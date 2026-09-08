@@ -173,6 +173,14 @@
   .term-list li span:first-child{flex:1 1 auto}
   .term-list li span:last-child{font-variant-numeric:tabular-nums;color:var(--ink-soft);text-align:right}
   .foot{margin-top:28px;font-size:13.5px;color:var(--ink-soft)}
+  /* ---- links ---- */
+  a.map-link{
+    color:inherit;text-decoration:underline dotted;text-underline-offset:2px;
+    padding:2px 0;display:inline-block;
+  }
+  a.map-link:hover, a.map-link:focus{text-decoration-style:solid}
+  a.map-link:focus-visible{outline:2px solid var(--plaque);outline-offset:2px}
+  .plaque a.map-link{color:#DCE6DD;text-decoration-color:rgba(244,246,242,.5) !important}
   @media (prefers-reduced-motion:no-preference){
     .plaque{animation:rise .5s ease-out both}
     @keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -204,16 +212,16 @@
       <div>
         <h3>Teaching buildings</h3>
         <ul class="addr-list">
-          <li style="border-color:var(--aquin)"><b>1 place Saint-Thomas d'Aquin, 75007</b><span>Français B1 room C.S16 (Mon)</span></li>
-          <li style="border-color:var(--chaise)"><b>9 rue de la Chaise, 75007</b><span>Econ for Enlightened Citizens, room 931 (Thu)</span></li>
-          <li style="border-color:var(--sg27)"><b>27 rue Saint-Guillaume, 75007</b><span>AI salle 15 &ldquo;Suzanne Borrel&rdquo; (Tue) · Technology &amp; War salle 15 (Thu) · Digital Public Spaces salle 26 (Fri)</span></li>
-          <li style="border-color:var(--sg28)"><b>28 rue Saint-Guillaume, 75007</b><span>Ethics of War and Peace, AMPHI28 (Mon)</span></li>
-          <li style="border-color:var(--germain)"><b>199 bd Saint-Germain, 75007</b><span>Français B1 room 611 (Wed only)</span></li>
+          <li style="border-color:var(--aquin)"><b><a class="map-link" target="_blank" rel="noopener" style="text-decoration-color:var(--aquin)" href="https://www.google.com/maps/search/?api=1&query=1%20Place%20Saint-Thomas%20d'Aquin%2C%2075007%20Paris%2C%20France">1 place Saint-Thomas d'Aquin, 75007</a></b><span>Français B1 room C.S16 (Mon)</span></li>
+          <li style="border-color:var(--chaise)"><b><a class="map-link" target="_blank" rel="noopener" style="text-decoration-color:var(--chaise)" href="https://www.google.com/maps/search/?api=1&query=9%20Rue%20de%20la%20Chaise%2C%2075007%20Paris%2C%20France">9 rue de la Chaise, 75007</a></b><span>Econ for Enlightened Citizens, room 931 (Thu)</span></li>
+          <li style="border-color:var(--sg27)"><b><a class="map-link" target="_blank" rel="noopener" style="text-decoration-color:var(--sg27)" href="https://www.google.com/maps/search/?api=1&query=27%20Rue%20Saint-Guillaume%2C%2075007%20Paris%2C%20France">27 rue Saint-Guillaume, 75007</a></b><span>AI salle 15 &ldquo;Suzanne Borrel&rdquo; (Tue) · Technology &amp; War salle 15 (Thu) · Digital Public Spaces salle 26 (Fri)</span></li>
+          <li style="border-color:var(--sg28)"><b><a class="map-link" target="_blank" rel="noopener" style="text-decoration-color:var(--sg28)" href="https://www.google.com/maps/search/?api=1&query=28%20Rue%20Saint-Guillaume%2C%2075007%20Paris%2C%20France">28 rue Saint-Guillaume, 75007</a></b><span>Ethics of War and Peace, AMPHI28 (Mon)</span></li>
+          <li style="border-color:var(--germain)"><b><a class="map-link" target="_blank" rel="noopener" style="text-decoration-color:var(--germain)" href="https://www.google.com/maps/search/?api=1&query=199%20Boulevard%20Saint-Germain%2C%2075007%20Paris%2C%20France">199 bd Saint-Germain, 75007</a></b><span>Français B1 room 611 (Wed only)</span></li>
         </ul>
         <h3>Sport</h3>
         <ul class="addr-list">
-          <li style="border-color:var(--sport)"><b>Gracie Barra Champerret</b><span>15 bd Gouvion-Saint-Cyr, 75017 · BJJ Mon, kickboxing Thu</span></li>
-          <li style="border-color:var(--sport)"><b>Stade Suchet, gymnase</b><span>25 av du Maréchal Franchet d'Esperey · Olympic wrestling Tue</span></li>
+          <li style="border-color:var(--sport)"><b><a class="map-link" target="_blank" rel="noopener" style="text-decoration-color:var(--sport)" href="https://www.google.com/maps/search/?api=1&query=Gracie%20Barra%20Champerret%2C%2015%20Boulevard%20Gouvion-Saint-Cyr%2C%2075017%20Paris%2C%20France">Gracie Barra Champerret</a></b><span>15 bd Gouvion-Saint-Cyr, 75017 · BJJ Mon, kickboxing Thu</span></li>
+          <li style="border-color:var(--sport)"><b><a class="map-link" target="_blank" rel="noopener" style="text-decoration-color:var(--sport)" href="https://www.google.com/maps/search/?api=1&query=Stade%20Suchet%2C%2025%20Avenue%20du%20Marechal%20Franchet%20d'Esperey%2C%2075016%20Paris%2C%20France">Stade Suchet, gymnase</a></b><span>25 av du Maréchal Franchet d'Esperey · Olympic wrestling Tue</span></li>
         </ul>
       </div>
       <div>
@@ -245,14 +253,15 @@
 <script>
 /* ---------- data ---------- */
 const LOC = {
-  chaise:{name:"9 rue de la Chaise", colour:"var(--chaise)"},
-  sg27:{name:"27 rue Saint-Guillaume", colour:"var(--sg27)"},
-  sg28:{name:"28 rue Saint-Guillaume", colour:"var(--sg28)"},
-  germain:{name:"199 bd Saint-Germain", colour:"var(--germain)"},
-  aquin:{name:"1 place Saint-Thomas d'Aquin", colour:"var(--aquin)"},
-  gracie:{name:"Gracie Barra Champerret, 15 bd Gouvion-Saint-Cyr", colour:"var(--sport)"},
-  suchet:{name:"Stade Suchet gymnase, 25 av du Maréchal Franchet d'Esperey", colour:"var(--sport)"}
+  chaise:{name:"9 rue de la Chaise", colour:"var(--chaise)", address:"9 Rue de la Chaise, 75007 Paris, France"},
+  sg27:{name:"27 rue Saint-Guillaume", colour:"var(--sg27)", address:"27 Rue Saint-Guillaume, 75007 Paris, France"},
+  sg28:{name:"28 rue Saint-Guillaume", colour:"var(--sg28)", address:"28 Rue Saint-Guillaume, 75007 Paris, France"},
+  germain:{name:"199 bd Saint-Germain", colour:"var(--germain)", address:"199 Boulevard Saint-Germain, 75007 Paris, France"},
+  aquin:{name:"1 place Saint-Thomas d'Aquin", colour:"var(--aquin)", address:"1 Place Saint-Thomas d'Aquin, 75007 Paris, France"},
+  gracie:{name:"Gracie Barra Champerret, 15 bd Gouvion-Saint-Cyr", colour:"var(--sport)", address:"Gracie Barra Champerret, 15 Boulevard Gouvion-Saint-Cyr, 75017 Paris, France"},
+  suchet:{name:"Stade Suchet gymnase, 25 av du Maréchal Franchet d'Esperey", colour:"var(--sport)", address:"Stade Suchet, 25 Avenue du Marechal Franchet d'Esperey, 75016 Paris, France"}
 };
+const mapsUrl = a => "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(a);
 // dow: 1 = Monday. ranges: [firstDate, lastDate] inclusive, weekly on dow.
 const SESSIONS = [
   {name:"Brazilian jiu-jitsu", code:"HSPO 5700", dow:1, from:"12:30", to:"14:00",
@@ -343,10 +352,11 @@ function renderHero(now){
   const when = u.live
     ? `On now · ends in ${human(mins)}`
     : (sameDay ? `Starts in ${human(mins)}` : `${u.d.toLocaleDateString("en-GB",{weekday:"long"})} ${u.s.from}, in ${human(mins)}`);
+  const locObj = LOC[u.s.loc];
   box.innerHTML = `
     <div class="lead">${when}</div>
     <div class="title">${u.s.name}</div>
-    <div class="where">${u.s.from}–${u.s.to} · ${LOC[u.s.loc].name}${u.s.room ? " · " + u.s.room : ""}</div>
+    <div class="where">${u.s.from}–${u.s.to} · <a class="map-link" target="_blank" rel="noopener" style="text-decoration-color:${locObj.colour}" href="${mapsUrl(locObj.address)}">${locObj.name}</a>${u.s.room ? " · " + u.s.room : ""}</div>
     ${u.s.flag ? `<div class="flag">${u.s.flag}</div>` : ""}`;
 }
 
@@ -381,7 +391,7 @@ function renderWeek(now){
           <div>
             <h3>${s.name} ${live?'<span class="badge">now</span>':''}
               ${s.code ? `<span class="code">${s.code}</span>` : ""}</h3>
-            <div class="addr">${LOC[s.loc].name}${s.room ? ` · <span class="room">${s.room}</span>` : ""}</div>
+            <div class="addr"><a class="map-link" target="_blank" rel="noopener" style="text-decoration-color:${LOC[s.loc].colour}" href="${mapsUrl(LOC[s.loc].address)}">${LOC[s.loc].name}</a>${s.room ? ` · <span class="room">${s.room}</span>` : ""}</div>
             ${s.flag ? `<div class="flag">${s.flag}</div>` : ""}
           </div>
         </div>`;
