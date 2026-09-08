@@ -220,7 +220,6 @@
         </ul>
         <h3>Sport</h3>
         <ul class="addr-list">
-          <li style="border-color:var(--sport)"><b><a class="map-link" target="_blank" rel="noopener" style="text-decoration-color:var(--sport)" href="https://www.google.com/maps/search/?api=1&query=Gracie%20Barra%20Champerret%2C%2015%20Boulevard%20Gouvion-Saint-Cyr%2C%2075017%20Paris%2C%20France">Gracie Barra Champerret</a></b><span>15 bd Gouvion-Saint-Cyr, 75017 · BJJ Mon, kickboxing Thu</span></li>
           <li style="border-color:var(--sport)"><b><a class="map-link" target="_blank" rel="noopener" style="text-decoration-color:var(--sport)" href="https://www.google.com/maps/search/?api=1&query=Stade%20Suchet%2C%2025%20Avenue%20du%20Marechal%20Franchet%20d'Esperey%2C%2075016%20Paris%2C%20France">Stade Suchet, gymnase</a></b><span>25 av du Maréchal Franchet d'Esperey · Olympic wrestling Tue</span></li>
         </ul>
       </div>
@@ -258,14 +257,12 @@ const LOC = {
   sg28:{name:"28 rue Saint-Guillaume", colour:"var(--sg28)", address:"28 Rue Saint-Guillaume, 75007 Paris, France"},
   germain:{name:"199 bd Saint-Germain", colour:"var(--germain)", address:"199 Boulevard Saint-Germain, 75007 Paris, France"},
   aquin:{name:"1 place Saint-Thomas d'Aquin", colour:"var(--aquin)", address:"1 Place Saint-Thomas d'Aquin, 75007 Paris, France"},
-  gracie:{name:"Gracie Barra Champerret, 15 bd Gouvion-Saint-Cyr", colour:"var(--sport)", address:"Gracie Barra Champerret, 15 Boulevard Gouvion-Saint-Cyr, 75017 Paris, France"},
-  suchet:{name:"Stade Suchet gymnase, 25 av du Maréchal Franchet d'Esperey", colour:"var(--sport)", address:"Stade Suchet, 25 Avenue du Marechal Franchet d'Esperey, 75016 Paris, France"}
+  suchet:{name:"Stade Suchet gymnase, 25 av du Maréchal Franchet d'Esperey", colour:"var(--sport)", address:"Stade Suchet, 25 Avenue du Marechal Franchet d'Esperey, 75016 Paris, France"},
+  breguet:{name:"Centre Sportif Bréguet", colour:"var(--sport)", address:"25-27 Rue Breguet, 75011 Paris, France"}
 };
 const mapsUrl = a => "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(a);
 // dow: 1 = Monday. ranges: [firstDate, lastDate] inclusive, weekly on dow.
 const SESSIONS = [
-  {name:"Brazilian jiu-jitsu", code:"HSPO 5700", dow:1, from:"12:30", to:"14:00",
-   loc:"gracie", room:"", ranges:[["2026-09-07","2026-10-24"],["2026-11-02","2026-11-16"]]},
   {name:"Français B1", code:"LFRA 52D0", dow:1, from:"14:45", to:"16:45",
    loc:"aquin", room:"room C.S16",
    ranges:[["2026-09-07","2026-10-19"],["2026-11-02","2026-11-30"]]},
@@ -277,22 +274,27 @@ const SESSIONS = [
   {name:"Econ for Enlightened Citizens", code:"AECO 25A27", dow:2, from:"14:45", to:"16:45",
    loc:"sg28", room:"room C", flag:"Catch-up session from the old registrar schedule — check it still stands",
    ranges:[["2026-09-22","2026-09-22"]]},
-  {name:"Olympic wrestling", code:"HSPO 5410", dow:2, from:"18:00", to:"20:00",
-   loc:"suchet", room:"", ranges:[["2026-09-08","2026-10-20"],["2026-11-03","2026-11-17"]]},
+  {name:"Wrestling · freestyle", code:"HSPO 5410", dow:2, from:"18:00", to:"20:00",
+   loc:"suchet", room:"", ranges:[["2026-09-08","2026-12-15"]]},
 
   {name:"Français B1", code:"LFRA 52D0", dow:3, from:"14:45", to:"16:45",
    loc:"germain", room:"room 611",
    ranges:[["2026-09-09","2026-10-21"],["2026-11-04","2026-11-04"],["2026-11-18","2026-12-09"]]},
+  {name:"Wrestling · Greco-Roman", code:"", dow:3, from:"19:00", to:"20:30",
+   loc:"suchet", room:"", ranges:[["2026-09-09","2026-12-16"]]},
 
-  {name:"Kickboxing", code:"HSPO 58045", dow:4, from:"09:00", to:"10:30",
-   loc:"gracie", room:"", ranges:[["2026-09-10","2026-10-22"],["2026-11-05","2026-11-19"]]},
   {name:"Econ for Enlightened Citizens", code:"AECO 25A27", dow:4, from:"14:45", to:"16:45",
    loc:"chaise", room:"room 931", ranges:[["2026-09-10","2026-10-22"],["2026-11-05","2026-12-03"]]},
   {name:"Technology, War…", code:"DSPO 25A22", dow:4, from:"19:15", to:"21:15",
    loc:"sg27", room:"salle 15", ranges:[["2026-09-10","2026-10-22"],["2026-11-05","2026-12-03"]]},
 
   {name:"Socio of Digital Public Spaces", code:"DSOC 25A42", dow:5, from:"08:00", to:"10:00",
-   loc:"sg27", room:"salle 26", ranges:[["2026-09-11","2026-10-23"],["2026-11-02","2026-12-10"]]}
+   loc:"sg27", room:"salle 26", ranges:[["2026-09-11","2026-10-23"],["2026-11-02","2026-12-10"]]},
+  {name:"Wrestling · freestyle & Greco", code:"", dow:5, from:"18:30", to:"20:00",
+   loc:"breguet", room:"", ranges:[["2026-09-11","2026-12-18"]]},
+
+  {name:"Wrestling · U15 to U23", code:"", dow:6, from:"13:30", to:"15:30",
+   loc:"suchet", room:"", flag:"Clashes with mid-term exams on 17 and 24 Oct, 7 and 14 Nov", ranges:[["2026-09-12","2026-12-19"]]}
 ];
 const MARKERS = {
   "2026-10-17":"Mid-term exams", "2026-10-24":"Mid-term exams",
@@ -308,7 +310,7 @@ const parse = s => { const [y,m,d]=s.split("-").map(Number); return new Date(y,m
 const at = (d,hhmm) => { const [h,m]=hhmm.split(":").map(Number); const x=new Date(d); x.setHours(h,m,0,0); return x; };
 const addDays = (d,n) => { const x=new Date(d); x.setDate(x.getDate()+n); return x; };
 const mondayOf = d => addDays(d, -((d.getDay()+6)%7));
-const DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday"];
+const DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
 const fmtDate = d => d.toLocaleDateString("en-GB",{day:"numeric",month:"long"});
 
 function sessionsOn(date){
@@ -341,7 +343,7 @@ function renderHero(now){
     now.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"});
   document.getElementById("clock").textContent =
     now.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}) + " in Paris" +
-    ((dow===0||dow===6) ? " · weekend" : "");
+    (dow===0 ? " · weekend" : "");
 
   const box = document.getElementById("nextBox");
   const u = upcoming(now);
@@ -361,13 +363,13 @@ function renderHero(now){
 }
 
 function renderWeek(now){
-  const start = anchor, end = addDays(anchor,4);
+  const start = anchor, end = addDays(anchor,6);
   document.getElementById("weekLabel").textContent =
     `${fmtDate(start)} – ${fmtDate(end)}`;
 
   const host = document.getElementById("week");
   host.innerHTML = "";
-  for(let i=0;i<5;i++){
+  for(let i=0;i<7;i++){
     const d = addDays(anchor,i), k = key(d);
     const isToday = k === key(now);
     const day = document.createElement("section");
@@ -376,9 +378,8 @@ function renderWeek(now){
                 <span class="date">${fmtDate(d)}</span></div>`;
 
     const list = sessionsOn(d);
-    if(k >= BREAK.from && k <= BREAK.to){
-      html += `<div class="empty">${BREAK.name} — no classes.</div>`;
-    } else if(!list.length){
+    const isBreak = k >= BREAK.from && k <= BREAK.to;
+    if(!list.length && !isBreak){
       html += `<div class="empty">Nothing scheduled.</div>`;
     }
     for(const s of list){
@@ -396,9 +397,7 @@ function renderWeek(now){
           </div>
         </div>`;
     }
-    // Saturday markers attach to the Friday card of that week
-    const sat = key(addDays(anchor,5));
-    if(i===4 && MARKERS[sat]) html += `<div class="exam">${MARKERS[sat]} on Saturday ${fmtDate(addDays(anchor,5))}.</div>`;
+    if(isBreak) html += `<div class="exam">Autumn break, no classes. Wrestling continues.</div>`;
     if(MARKERS[k]) html += `<div class="exam">${MARKERS[k]}.</div>`;
     day.innerHTML = html;
     host.appendChild(day);
