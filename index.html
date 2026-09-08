@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Autumn 2026 timetable · Sciences Po</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --plaque:#0E3129;
+    --plaque-soft:#16463A;
+    --paper:#F1F1EC;
+    --paper-2:#E4E4DC;
+    --ink:#171A19;
+    --ink-soft:#5C6360;
+    --hair:#CFCFC5;
+    --chaise:#B0296B;
+    --sg27:#12609B;
+    --sg28:#B4720A;
+    --germain:#5C46A0;
+    --aquin:#0F7A6B;
+    --sport:#41565E;
+    --alert:#A32718;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+    font-size:16px;
+    line-height:1.45;
+  }
+  .wrap{max-width:940px;margin:0 auto;padding:20px 18px 64px}
+
+  /* ---- plaque hero ---- */
+  .plaque{
+    background:var(--plaque);
+    color:#F4F6F2;
+    border:2px solid #F4F6F2;
+    outline:3px solid var(--plaque);
+    border-radius:6px;
+    padding:18px 20px 20px;
+    box-shadow:0 1px 0 rgba(0,0,0,.25);
+  }
+  .plaque .kicker{
+    font-family:"Instrument Serif",Georgia,serif;
+    font-size:15px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:#9FC0AF;
+    margin:0 0 6px;
+  }
+  .plaque h1{
+    font-family:"Instrument Serif",Georgia,serif;
+    font-weight:400;
+    font-size:clamp(30px,7vw,46px);
+    line-height:1.02;
+    margin:0 0 14px;
+    letter-spacing:.005em;
+  }
+  .plaque .clock{
+    font-variant-numeric:tabular-nums;
+    color:#9FC0AF;
+    font-size:14px;
+  }
+  .next{
+    margin-top:16px;
+    border-top:1px solid rgba(244,246,242,.28);
+    padding-top:14px;
+    display:grid;
+    gap:4px;
+  }
+  .next .lead{font-size:13.5px;color:#9FC0AF;font-variant-numeric:tabular-nums}
+  .next .title{
+    font-family:"Instrument Serif",Georgia,serif;
+    font-size:clamp(21px,4.6vw,28px);
+    line-height:1.15;
+  }
+  .next .where{font-size:15px;color:#DCE6DD}
+  .next .flag{color:#F7C6A8;font-size:14px;margin-top:4px}
+
+  /* ---- controls ---- */
+  .bar{
+    display:flex;align-items:center;gap:8px;
+    margin:22px 0 12px;flex-wrap:wrap;
+  }
+  .bar .label{
+    font-family:"Instrument Serif",Georgia,serif;
+    font-size:20px;flex:1 1 auto;min-width:180px;
+  }
+  button{
+    font:inherit;font-size:14px;
+    background:transparent;color:var(--ink);
+    border:1px solid var(--hair);border-radius:999px;
+    padding:6px 13px;cursor:pointer;
+  }
+  button:hover{background:var(--paper-2)}
+  button:focus-visible{outline:2px solid var(--plaque);outline-offset:2px}
+  button.solid{background:var(--plaque);color:#F4F6F2;border-color:var(--plaque)}
+
+  /* ---- days ---- */
+  .day{
+    border-top:1px solid var(--hair);
+    padding:14px 0 4px;
+  }
+  .day-head{
+    display:flex;align-items:baseline;gap:10px;margin-bottom:8px;
+  }
+  .day-head h2{
+    font-family:"Instrument Serif",Georgia,serif;
+    font-weight:400;font-size:21px;margin:0;
+  }
+  .day-head .date{font-size:13.5px;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+  .day.today .day-head h2{color:var(--plaque)}
+  .day.today{
+    background:linear-gradient(90deg,rgba(14,49,41,.055),rgba(14,49,41,0) 70%);
+    border-top-color:var(--plaque);
+  }
+  .dot{
+    width:7px;height:7px;border-radius:50%;background:var(--plaque);
+    display:inline-block;margin-left:2px;
+  }
+  .empty{color:var(--ink-soft);font-size:14.5px;padding:2px 0 10px}
+
+  .slot{
+    display:grid;
+    grid-template-columns:76px 4px 1fr;
+    gap:0 12px;
+    align-items:stretch;
+    padding:8px 0;
+  }
+  .slot + .slot{border-top:1px dotted var(--hair)}
+  .time{
+    font-variant-numeric:tabular-nums;
+    font-size:14.5px;line-height:1.3;padding-top:2px;color:var(--ink);
+  }
+  .time small{display:block;color:var(--ink-soft);font-size:12.5px}
+  .rail{border-radius:2px;background:var(--sg27)}
+  .slot h3{margin:0 0 2px;font-size:16.5px;font-weight:600;line-height:1.25}
+  .slot .code{font-weight:400;color:var(--ink-soft);font-size:13.5px}
+  .slot .addr{font-size:14.5px;color:var(--ink-soft)}
+  .slot .room{color:var(--ink);font-weight:500}
+  .slot .flag{
+    font-size:13.5px;color:var(--alert);margin-top:3px;
+  }
+  .slot.done{opacity:.42}
+  .slot.live .badge{
+    display:inline-block;background:var(--plaque);color:#F4F6F2;
+    border-radius:999px;padding:1px 9px;font-size:12.5px;margin-left:6px;
+    vertical-align:1px;
+  }
+  .exam{
+    font-size:14px;color:var(--sg28);padding:2px 0 10px;
+  }
+
+  /* ---- reference ---- */
+  .ref{margin-top:40px;border-top:2px solid var(--plaque);padding-top:20px}
+  .ref h2{font-family:"Instrument Serif",Georgia,serif;font-weight:400;font-size:24px;margin:0 0 14px}
+  .cols{display:grid;gap:26px}
+  @media(min-width:720px){.cols{grid-template-columns:1fr 1fr}}
+  .ref h3{font-size:15px;margin:0 0 8px;font-weight:600}
+  .addr-list,.term-list{list-style:none;margin:0;padding:0;font-size:14.5px}
+  .addr-list li{padding:7px 0 7px 12px;border-left:4px solid var(--hair);margin-bottom:8px}
+  .addr-list li b{display:block;font-weight:600}
+  .addr-list li span{color:var(--ink-soft)}
+  .term-list li{
+    display:flex;gap:10px;padding:5px 0;border-bottom:1px dotted var(--hair);
+  }
+  .term-list li span:first-child{flex:1 1 auto}
+  .term-list li span:last-child{font-variant-numeric:tabular-nums;color:var(--ink-soft);text-align:right}
+  .foot{margin-top:28px;font-size:13.5px;color:var(--ink-soft)}
+  @media (prefers-reduced-motion:no-preference){
+    .plaque{animation:rise .5s ease-out both}
+    @keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="plaque">
+    <p class="kicker">Sciences Po · Paris · A6423</p>
+    <h1 id="heroDay">Loading</h1>
+    <div class="clock" id="clock"></div>
+    <div class="next" id="nextBox"></div>
+  </header>
+
+  <div class="bar">
+    <div class="label" id="weekLabel"></div>
+    <button id="prev" aria-label="Previous week">&larr; Earlier</button>
+    <button id="today" class="solid">This week</button>
+    <button id="next" aria-label="Next week">Later &rarr;</button>
+  </div>
+
+  <main id="week"></main>
+
+  <section class="ref">
+    <h2>Where you're going</h2>
+    <div class="cols">
+      <div>
+        <h3>Teaching buildings</h3>
+        <ul class="addr-list">
+          <li style="border-color:var(--aquin)"><b>1 place Saint-Thomas d'Aquin, 75007</b><span>Français B1 room C.S16 (Mon)</span></li>
+          <li style="border-color:var(--chaise)"><b>9 rue de la Chaise, 75007</b><span>Econ for Enlightened Citizens, room 931 (Thu)</span></li>
+          <li style="border-color:var(--sg27)"><b>27 rue Saint-Guillaume, 75007</b><span>AI salle 15 &ldquo;Suzanne Borrel&rdquo; (Tue) · Technology &amp; War salle 15 (Thu) · Digital Public Spaces salle 26 (Fri)</span></li>
+          <li style="border-color:var(--sg28)"><b>28 rue Saint-Guillaume, 75007</b><span>Ethics of War and Peace, AMPHI28 (Mon)</span></li>
+          <li style="border-color:var(--germain)"><b>199 bd Saint-Germain, 75007</b><span>Français B1 room 611 (Wed only)</span></li>
+        </ul>
+        <h3>Sport</h3>
+        <ul class="addr-list">
+          <li style="border-color:var(--sport)"><b>Gracie Barra Champerret</b><span>15 bd Gouvion-Saint-Cyr, 75017 · BJJ Mon, kickboxing Thu</span></li>
+          <li style="border-color:var(--sport)"><b>Stade Suchet, gymnase</b><span>25 av du Maréchal Franchet d'Esperey · Olympic wrestling Tue</span></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Autumn semester 2026</h3>
+        <ul class="term-list">
+          <li><span>Classes</span><span>7 Sep – 9 Dec</span></li>
+          <li><span>Mid-term exams</span><span>17 &amp; 24 Oct, 7 &amp; 14 Nov</span></li>
+          <li><span>Autumn break</span><span>26 – 31 Oct</span></li>
+          <li><span>Final exams</span><span>11 – 19 Dec</span></li>
+          <li><span>Winter closure</span><span>19 Dec – 3 Jan</span></li>
+        </ul>
+        <h3 style="margin-top:18px">Spring semester 2027</h3>
+        <ul class="term-list">
+          <li><span>Course registration</span><span>5 – 8 &amp; 11 – 12 Jan</span></li>
+          <li><span>Induction</span><span>11 – 22 Jan</span></li>
+          <li><span>Classes</span><span>23 Jan – 26 Apr</span></li>
+          <li><span>Mid-term exams</span><span>6, 13, 20 Mar, 3 Apr</span></li>
+          <li><span>Winter break</span><span>15 – 20 Feb</span></li>
+          <li><span>Easter closure</span><span>27 – 29 Mar</span></li>
+          <li><span>Final exams</span><span>3 – 15 May</span></li>
+          <li><span>Grand Oral</span><span>18 – 28 May (repeat 1 – 4 Jun)</span></li>
+        </ul>
+      </div>
+    </div>
+    <p class="foot">32 credit hours. One thing still needs confirming: whether the Econ catch-up on Tuesday 22 September is still happening. Monday Français is at 1 place Saint-Thomas d'Aquin, room C.S16, confirmed in class on 7 September. Times are Paris time and update on their own each time you open this.</p>
+  </section>
+</div>
+
+<script>
+/* ---------- data ---------- */
+const LOC = {
+  chaise:{name:"9 rue de la Chaise", colour:"var(--chaise)"},
+  sg27:{name:"27 rue Saint-Guillaume", colour:"var(--sg27)"},
+  sg28:{name:"28 rue Saint-Guillaume", colour:"var(--sg28)"},
+  germain:{name:"199 bd Saint-Germain", colour:"var(--germain)"},
+  aquin:{name:"1 place Saint-Thomas d'Aquin", colour:"var(--aquin)"},
+  gracie:{name:"Gracie Barra Champerret, 15 bd Gouvion-Saint-Cyr", colour:"var(--sport)"},
+  suchet:{name:"Stade Suchet gymnase, 25 av du Maréchal Franchet d'Esperey", colour:"var(--sport)"}
+};
+// dow: 1 = Monday. ranges: [firstDate, lastDate] inclusive, weekly on dow.
+const SESSIONS = [
+  {name:"Brazilian jiu-jitsu", code:"HSPO 5700", dow:1, from:"12:30", to:"14:00",
+   loc:"gracie", room:"", ranges:[["2026-09-07","2026-10-24"],["2026-11-02","2026-11-16"]]},
+  {name:"Français B1", code:"LFRA 52D0", dow:1, from:"14:45", to:"16:45",
+   loc:"aquin", room:"room C.S16",
+   ranges:[["2026-09-07","2026-10-19"],["2026-11-02","2026-11-30"]]},
+  {name:"Ethics of War and Peace", code:"AHUM 25A15", dow:1, from:"17:00", to:"19:00",
+   loc:"sg28", room:"AMPHI28", ranges:[["2026-09-07","2026-10-19"],["2026-11-02","2026-11-30"]]},
+
+  {name:"Investigating with AI", code:"DHUM 25A43", dow:2, from:"08:00", to:"10:00",
+   loc:"sg27", room:"salle 15 (Suzanne Borrel)", ranges:[["2026-09-08","2026-10-20"],["2026-11-03","2026-12-01"]]},
+  {name:"Econ for Enlightened Citizens", code:"AECO 25A27", dow:2, from:"14:45", to:"16:45",
+   loc:"sg28", room:"room C", flag:"Catch-up session from the old registrar schedule — check it still stands",
+   ranges:[["2026-09-22","2026-09-22"]]},
+  {name:"Olympic wrestling", code:"HSPO 5410", dow:2, from:"18:00", to:"20:00",
+   loc:"suchet", room:"", ranges:[["2026-09-08","2026-10-20"],["2026-11-03","2026-11-17"]]},
+
+  {name:"Français B1", code:"LFRA 52D0", dow:3, from:"14:45", to:"16:45",
+   loc:"germain", room:"room 611",
+   ranges:[["2026-09-09","2026-10-21"],["2026-11-04","2026-11-04"],["2026-11-18","2026-12-09"]]},
+
+  {name:"Kickboxing", code:"HSPO 58045", dow:4, from:"09:00", to:"10:30",
+   loc:"gracie", room:"", ranges:[["2026-09-10","2026-10-22"],["2026-11-05","2026-11-19"]]},
+  {name:"Econ for Enlightened Citizens", code:"AECO 25A27", dow:4, from:"14:45", to:"16:45",
+   loc:"chaise", room:"room 931", ranges:[["2026-09-10","2026-10-22"],["2026-11-05","2026-12-03"]]},
+  {name:"Technology, War…", code:"DSPO 25A22", dow:4, from:"19:15", to:"21:15",
+   loc:"sg27", room:"salle 15", ranges:[["2026-09-10","2026-10-22"],["2026-11-05","2026-12-03"]]},
+
+  {name:"Socio of Digital Public Spaces", code:"DSOC 25A42", dow:5, from:"08:00", to:"10:00",
+   loc:"sg27", room:"salle 26", ranges:[["2026-09-11","2026-10-23"],["2026-11-02","2026-12-10"]]}
+];
+const MARKERS = {
+  "2026-10-17":"Mid-term exams", "2026-10-24":"Mid-term exams",
+  "2026-11-07":"Mid-term exams", "2026-11-14":"Mid-term exams",
+  "2026-12-09":"Last day of classes", "2026-12-11":"Final exams begin"
+};
+const BREAK = {from:"2026-10-26", to:"2026-10-31", name:"Autumn break"};
+
+/* ---------- date helpers ---------- */
+const pad = n => String(n).padStart(2,"0");
+const key = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parse = s => { const [y,m,d]=s.split("-").map(Number); return new Date(y,m-1,d); };
+const at = (d,hhmm) => { const [h,m]=hhmm.split(":").map(Number); const x=new Date(d); x.setHours(h,m,0,0); return x; };
+const addDays = (d,n) => { const x=new Date(d); x.setDate(x.getDate()+n); return x; };
+const mondayOf = d => addDays(d, -((d.getDay()+6)%7));
+const DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday"];
+const fmtDate = d => d.toLocaleDateString("en-GB",{day:"numeric",month:"long"});
+
+function sessionsOn(date){
+  const k = key(date), dow = (date.getDay()+6)%7 + 1;
+  const out = [];
+  for(const s of SESSIONS){
+    if(s.dow !== dow) continue;
+    const on = s.ranges.some(([a,b]) => k >= a && k <= b);
+    if(on) out.push(s);
+  }
+  return out.sort((a,b) => a.from.localeCompare(b.from));
+}
+function upcoming(now, limit = 60){
+  for(let i=0;i<limit;i++){
+    const d = addDays(now,i);
+    for(const s of sessionsOn(d)){
+      const start = at(d,s.from), end = at(d,s.to);
+      if(end > now) return {s, d, start, end, live: start <= now};
+    }
+  }
+  return null;
+}
+
+/* ---------- render ---------- */
+let anchor = mondayOf(new Date());
+
+function renderHero(now){
+  const dow = now.getDay();
+  document.getElementById("heroDay").textContent =
+    now.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"});
+  document.getElementById("clock").textContent =
+    now.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}) + " in Paris" +
+    ((dow===0||dow===6) ? " · weekend" : "");
+
+  const box = document.getElementById("nextBox");
+  const u = upcoming(now);
+  if(!u){ box.innerHTML = '<div class="lead">Nothing left on the timetable. Semester\'s done.</div>'; return; }
+  const mins = Math.round((u.live ? u.end - now : u.start - now)/60000);
+  const human = m => m < 60 ? `${m} min` : `${Math.floor(m/60)} h ${pad(m%60)}`;
+  const sameDay = key(u.d) === key(now);
+  const when = u.live
+    ? `On now · ends in ${human(mins)}`
+    : (sameDay ? `Starts in ${human(mins)}` : `${u.d.toLocaleDateString("en-GB",{weekday:"long"})} ${u.s.from}, in ${human(mins)}`);
+  box.innerHTML = `
+    <div class="lead">${when}</div>
+    <div class="title">${u.s.name}</div>
+    <div class="where">${u.s.from}–${u.s.to} · ${LOC[u.s.loc].name}${u.s.room ? " · " + u.s.room : ""}</div>
+    ${u.s.flag ? `<div class="flag">${u.s.flag}</div>` : ""}`;
+}
+
+function renderWeek(now){
+  const start = anchor, end = addDays(anchor,4);
+  document.getElementById("weekLabel").textContent =
+    `${fmtDate(start)} – ${fmtDate(end)}`;
+
+  const host = document.getElementById("week");
+  host.innerHTML = "";
+  for(let i=0;i<5;i++){
+    const d = addDays(anchor,i), k = key(d);
+    const isToday = k === key(now);
+    const day = document.createElement("section");
+    day.className = "day" + (isToday ? " today" : "");
+    let html = `<div class="day-head"><h2>${DAYS[i]}${isToday?'<span class="dot"></span>':''}</h2>
+                <span class="date">${fmtDate(d)}</span></div>`;
+
+    const list = sessionsOn(d);
+    if(k >= BREAK.from && k <= BREAK.to){
+      html += `<div class="empty">${BREAK.name} — no classes.</div>`;
+    } else if(!list.length){
+      html += `<div class="empty">Nothing scheduled.</div>`;
+    }
+    for(const s of list){
+      const startT = at(d,s.from), endT = at(d,s.to);
+      const done = endT < now, live = startT <= now && endT > now;
+      html += `
+        <div class="slot ${done?"done":""} ${live?"live":""}">
+          <div class="time">${s.from}<small>${s.to}</small></div>
+          <div class="rail" style="background:${LOC[s.loc].colour}"></div>
+          <div>
+            <h3>${s.name} ${live?'<span class="badge">now</span>':''}
+              ${s.code ? `<span class="code">${s.code}</span>` : ""}</h3>
+            <div class="addr">${LOC[s.loc].name}${s.room ? ` · <span class="room">${s.room}</span>` : ""}</div>
+            ${s.flag ? `<div class="flag">${s.flag}</div>` : ""}
+          </div>
+        </div>`;
+    }
+    // Saturday markers attach to the Friday card of that week
+    const sat = key(addDays(anchor,5));
+    if(i===4 && MARKERS[sat]) html += `<div class="exam">${MARKERS[sat]} on Saturday ${fmtDate(addDays(anchor,5))}.</div>`;
+    if(MARKERS[k]) html += `<div class="exam">${MARKERS[k]}.</div>`;
+    day.innerHTML = html;
+    host.appendChild(day);
+  }
+}
+
+function tick(){
+  const now = new Date();
+  renderHero(now);
+  renderWeek(now);
+}
+document.getElementById("prev").onclick = () => { anchor = addDays(anchor,-7); tick(); };
+document.getElementById("next").onclick = () => { anchor = addDays(anchor,7); tick(); };
+document.getElementById("today").onclick = () => { anchor = mondayOf(new Date()); tick(); };
+tick();
+setInterval(tick, 30000);
+</script>
+</body>
+</html>
