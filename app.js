@@ -194,9 +194,184 @@ function switchTab(tabId) {
   document.getElementById("panel-academics").style.display = isAcademics ? "block" : "none";
 }
 
+function readState(key) {
+  try { return JSON.parse(localStorage.getItem(key) || "{}"); }
+  catch(e) { return {}; }
+}
+function writeState(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); }
+  catch(e) {}
+}
+
+function getAllSeminars() {
+  const all = [];
+  if(!window.COURSES) return all;
+  for(const c of window.COURSES) {
+    if(!c.seminars) continue;
+    const occs = occurrencesOf(c.scheduleId);
+    const sess = SESSIONS.find(s => s.id === c.scheduleId);
+    if(!sess) continue;
+    for(const sem of c.seminars) {
+      const d = occs[sem.n - 1];
+      if(!d) continue;
+      let from = sess.from;
+      let to = sess.to;
+      if(sem.timeOverride) {
+        from = sem.timeOverride.from;
+        to = sem.timeOverride.to;
+      }
+      const startT = at(d, from);
+      const endT = at(d, to);
+      all.push({ course: c, sem, d, startT, endT, sess, from, to });
+    }
+  }
+  return all.sort((a,b) => a.startT - b.startT);
+}
+
+function getAllDeadlines() {
+  const all = [];
+  if(!window.COURSES) return all;
+  for(const c of window.COURSES) {
+    if(!c.assessments) continue;
+    for(const a of c.assessments) {
+      let t = a.due ? new Date(a.due) : null;
+      all.push({ course: c, a, t });
+    }
+  }
+  return all;
+}
+
 function renderAcademicsRoute(path) {
   const panel = document.getElementById("panel-academics");
-  panel.innerHTML = `<div style="padding-top:20px;">Academics placeholder</div>`;
+  if (!path.length || path[0] === "") {
+    renderAcademicsLanding(panel);
+  } else if (path[0] === "deadlines") {
+    panel.innerHTML = `<div style="padding-top:20px;">Deadlines list placeholder</div>`;
+  } else {
+    panel.innerHTML = `<div style="padding-top:20px;">Course ${path[0]} placeholder</div>`;
+  }
+}
+
+function renderAcademicsLanding(panel) {
+  const now = new Date();
+  const sems = getAllSeminars();
+  const nextSem = sems.find(x => x.endT > now);
+  const tasks = readState("spo.v1.tasks");
+  const readingsState = readState("spo.v1.readings");
+
+  let html = `<div style="display:flex; flex-direction:column; gap:32px; padding-top:16px;">`;
+
+  // 1. Next Seminar
+  html += `<div><h2 style="font-family:'Instrument Serif',serif;font-size:24px;margin:0 0 12px;font-weight:400;">Next class</h2>`;
+  if(nextSem) {
+    const isToday = key(nextSem.d) === key(now);
+    const dateStr = isToday ? "Today" : fmtDate(nextSem.d);
+    const locObj = LOC[nextSem.sess.loc];
+    html += `
+      <div style="background:var(--paper-2); border-radius:6px; padding:16px; border-left:4px solid ${locObj.colour}">
+        <div style="font-size:13.5px; color:var(--ink-soft); margin-bottom:4px;">${dateStr}, ${nextSem.from}–${nextSem.to}</div>
+        <h3 style="margin:0 0 4px; font-size:18px;"><a href="#/academics/${nextSem.course.id}" style="color:inherit;text-decoration:none;">${nextSem.course.title}</a></h3>
+        <div style="font-weight:600; margin-bottom:4px;">Session ${nextSem.sem.n}: ${nextSem.sem.title || ""}</div>
+        <div style="font-size:14.5px; margin-bottom:12px;">
+          <a class="map-link" target="_blank" rel="noopener" style="text-decoration-color:${locObj.colour}" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locObj.address)}">${locObj.name}</a>${nextSem.sess.room ? " · " + nextSem.sess.room : ""}
+        </div>
+    `;
+    const reqs = (nextSem.sem.readings || []).filter(r => r.status === "required");
+    if(reqs.length > 0) {
+      html += `<div style="font-size:14px; font-weight:600; margin-bottom:8px;">Required readings:</div>`;
+      html += `<div style="display:flex; flex-direction:column; gap:8px;">`;
+      for(const r of reqs) {
+        const checked = readingsState[r.id] ? "checked" : "";
+        html += `<label style="display:flex; gap:12px; align-items:flex-start; font-size:14px; cursor:pointer;">
+          <input type="checkbox" disabled ${checked} style="margin-top:3px;width:18px;height:18px;">
+          <div>${r.author}. <i>${r.title}</i>.</div>
+        </label>`;
+      }
+      html += `</div>`;
+    }
+    html += `</div>`;
+  } else {
+    html += `<div class="empty">No upcoming classes.</div>`;
+  }
+  html += `</div>`;
+
+  // 2. Deadlines
+  html += `<div><h2 style="font-family:'Instrument Serif',serif;font-size:24px;margin:0 0 12px;font-weight:400;">
+    Upcoming Deadlines <a href="#/academics/deadlines" style="font-size:14px; font-family:'Instrument Sans',sans-serif; text-decoration:none; margin-left:12px;">See all &rarr;</a>
+  </h2>`;
+  const allDeads = getAllDeadlines();
+  // filter out past OR ticked deadlines for the top 4? The brief says "The next four assessments by due... Anything within 7 days is emphasised; anything overdue and unticked is emphasised more strongly."
+  // Wait, overdue AND unticked implies past deadlines are included if unticked!
+  const sortedDeads = allDeads
+    .filter(x => x.t) // must have a date
+    .sort((a,b) => a.t - b.t);
+  
+  // To find next 4, we might want the first 4 that are (future OR (past and unticked)).
+  const relevantDeads = sortedDeads.filter(x => x.t > now || !tasks[x.a.id]).slice(0,4);
+  if(relevantDeads.length) {
+    html += `<div style="display:grid; gap:12px;">`;
+    for(const d of relevantDeads) {
+      const isDone = !!tasks[d.a.id];
+      const days = (d.t - now) / (1000*60*60*24);
+      let emClass = "";
+      if(!isDone && days < 0) emClass = `color:var(--alert); font-weight:600;`;
+      else if(!isDone && days < 7) emClass = `font-weight:600;`;
+      const timeStr = d.a.provisional ? `<del>${fmtDate(d.t)}</del> (unconfirmed)` : fmtDate(d.t);
+      html += `
+        <div style="background:var(--paper-2); padding:12px; border-radius:6px; display:flex; gap:12px; align-items:flex-start; ${emClass}">
+          <input type="checkbox" disabled ${isDone?"checked":""} style="margin-top:3px;width:18px;height:18px;">
+          <div>
+            <div style="font-size:13.5px; color:var(--ink-soft); margin-bottom:2px;">${d.course.code} · ${timeStr}</div>
+            <div style="font-size:15px; margin-bottom:2px;">${d.a.title}</div>
+            <div style="font-size:13.5px; color:var(--ink-soft);">${d.a.weight !== null ? d.a.weight+"%" : "Unknown weight"}</div>
+          </div>
+        </div>
+      `;
+    }
+    html += `</div>`;
+  } else {
+    html += `<div class="empty">No upcoming deadlines.</div>`;
+  }
+  html += `</div>`;
+
+  // 3. Courses
+  html += `<div><h2 style="font-family:'Instrument Serif',serif;font-size:24px;margin:0 0 12px;font-weight:400;">Courses</h2>`;
+  if(window.COURSES) {
+    html += `<div style="display:grid; gap:12px;">`;
+    for(const c of window.COURSES) {
+      const locObj = LOC[c.building];
+      const cSems = sems.filter(x => x.course.id === c.id);
+      const cNext = cSems.find(x => x.endT > now);
+      const cPastCount = cSems.filter(x => x.endT < now).length;
+      
+      let reqCount = 0;
+      if(c.seminars) {
+        for(const sem of c.seminars) {
+          if(sem.readings) {
+            for(const r of sem.readings) {
+              if(r.status === "required" && !readingsState[r.id]) reqCount++;
+            }
+          }
+        }
+      }
+      
+      html += `
+        <a href="#/academics/${c.id}" style="display:block; text-decoration:none; color:inherit; background:var(--paper-2); padding:16px; border-radius:6px; border-left:4px solid ${locObj?locObj.colour:'var(--hair)'}">
+          <h3 style="margin:0 0 4px; font-size:17px;">${c.title}</h3>
+          <div style="font-size:14.5px; color:var(--ink-soft); margin-bottom:12px;">${c.instructor || ""}</div>
+          <div style="display:flex; justify-content:space-between; font-size:13.5px; color:var(--ink-soft);">
+            <span>${cNext ? "Next: " + fmtDate(cNext.d) : "Finished"}</span>
+            <span>${cPastCount}/12 done · ${reqCount} readings left</span>
+          </div>
+        </a>
+      `;
+    }
+    html += `</div>`;
+  }
+  html += `</div>`;
+  
+  html += `</div>`;
+  panel.innerHTML = html;
 }
 
 function handleRoute() {
