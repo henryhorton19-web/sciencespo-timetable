@@ -534,6 +534,13 @@ function renderAcademicsLanding(panel) {
 
   let html = `<div style="display:flex; flex-direction:column; gap:32px; padding-top:16px;">`;
 
+  html += `<div>
+    <input type="search" id="academicsSearch" placeholder="Search courses, readings, seminars..." style="width:100%; padding:10px 14px; font-size:16px; font-family:inherit; border:1px solid var(--hair); border-radius:6px; background:var(--paper-2); color:inherit;" oninput="window.handleSearch()">
+    <div id="searchResults" style="display:none; margin-top:16px;"></div>
+  </div>`;
+
+  html += `<div id="academicsContent" style="display:flex; flex-direction:column; gap:32px;">`;
+
   // 1. Next Seminar
   html += `<div><h2 style="font-family:'Instrument Serif',serif;font-size:24px;margin:0 0 12px;font-weight:400;">Next class</h2>`;
   if(nextSem) {
@@ -662,6 +669,7 @@ function renderAcademicsLanding(panel) {
   </div>`;
   
   html += `</div>`;
+  html += `</div>`;
   panel.innerHTML = html;
 }
 
@@ -719,3 +727,59 @@ setInterval(() => {
     renderAcademicsRoute(route.path);
   }
 }, 30000);
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+
+window.handleSearch = () => {
+  const q = document.getElementById("academicsSearch").value.trim();
+  const res = document.getElementById("searchResults");
+  const con = document.getElementById("academicsContent");
+  if(!q) {
+    res.style.display = "none";
+    con.style.display = "flex";
+    return;
+  }
+  res.style.display = "block";
+  con.style.display = "none";
+  
+  if(!window.academicsFuse && window.Fuse) {
+    const docs = [];
+    if(window.COURSES) {
+      for(const c of window.COURSES) {
+        docs.push({ type: "Course", title: c.title, code: c.code, id: c.id });
+        if(c.seminars) {
+          for(const s of c.seminars) {
+            docs.push({ type: "Seminar", title: s.title, note: s.note, courseId: c.id, cTitle: c.title });
+            if(s.readings) {
+              for(const r of s.readings) {
+                docs.push({ type: "Reading", title: r.title, author: r.author, courseId: c.id, cTitle: c.title });
+              }
+            }
+          }
+        }
+      }
+    }
+    window.academicsFuse = new window.Fuse(docs, { keys: ["title", "code", "author", "note"], threshold: 0.3 });
+  }
+  
+  if(!window.academicsFuse) return;
+  const results = window.academicsFuse.search(q);
+  if(results.length === 0) {
+    res.innerHTML = `<div class="empty">No results found.</div>`;
+    return;
+  }
+  
+  let h = `<div style="display:grid; gap:12px;">`;
+  for(const item of results.slice(0,20)) {
+    const d = item.item;
+    h += `<a href="#/academics/${d.id || d.courseId}" onclick="setTimeout(() => { document.getElementById('academicsSearch').value=''; window.handleSearch(); }, 100)" style="display:block; text-decoration:none; color:inherit; background:var(--paper-2); padding:12px; border-radius:6px;">
+      <div style="font-size:12px; font-weight:600; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">${d.type} ${d.cTitle ? "· " + d.cTitle : ""}</div>
+      <div style="font-size:15px; font-weight:500;">${d.title || d.code}</div>
+      ${d.author ? `<div style="font-size:13.5px; color:var(--ink-soft); margin-top:2px;">${d.author}</div>` : ""}
+    </a>`;
+  }
+  h += `</div>`;
+  res.innerHTML = h;
+};
