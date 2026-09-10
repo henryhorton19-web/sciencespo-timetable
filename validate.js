@@ -1,3 +1,7 @@
+/**
+ * Manual pre-deploy check.
+ * Run \`node validate.js\` to assert date consistency between schedule and courses.
+ */
 const fs = require('fs');
 const scheduleJS = fs.readFileSync('data-schedule.js', 'utf8');
 const coursesJS = fs.readFileSync('data-courses.js', 'utf8');

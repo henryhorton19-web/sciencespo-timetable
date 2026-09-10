@@ -324,37 +324,41 @@ function getAllDeadlines() {
 }
 
 function renderReading(r, readingsState) {
-  const isReq = r.status === "required";
-  const badgeClass = isReq ? `style="background:var(--alert);color:#fff;padding:1px 6px;border-radius:4px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.02em;margin-right:6px;vertical-align:1px;"` 
-                           : `style="background:var(--hair);color:var(--ink);padding:1px 6px;border-radius:4px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.02em;margin-right:6px;vertical-align:1px;"`;
+  const badgeClass = r.status === "required" 
+    ? `class="reading-badge required"`
+    : `class="reading-badge recommended"`;
   const statusBadge = `<span ${badgeClass}>${r.status}</span>`;
   
   let cite = ``;
   if(r.author) cite += `<span style="font-weight:500;">${r.author}</span>. `;
-  if(r.year) cite += `(${r.year}). `;
   if(r.title) cite += `<i>${r.title}</i>. `;
-  if(r.publication) cite += `${r.publication}. `;
+  if(r.container || r.publisher) cite += `${r.container || r.publisher}. `;
+  if(r.volume) cite += `${r.volume}`;
+  if(r.issue) cite += `(${r.issue})`;
+  if(r.volume || r.issue) cite += `. `;
+  if(r.year) cite += `${r.year}. `;
+  if(r.pages) cite += `pp. ${r.pages}. `;
   
   let locHtml = "";
-  if(r.locators) {
-    const parts = [];
-    if(r.locators.url) parts.push(`<a class="map-link" href="${r.locators.url}" target="_blank" rel="noopener">Source</a>`);
-    if(r.locators.doi) parts.push(`<a class="map-link" href="${r.locators.doi}" target="_blank" rel="noopener">DOI</a>`);
-    if(r.locators.online) parts.push(`<a class="map-link" href="${r.locators.online}" target="_blank" rel="noopener">Catalogue</a>`);
-    if(r.locators.shelfmark) {
-      parts.push(`<span style="user-select:text; cursor:text;">${r.locators.shelfmark}</span> <!-- TODO: Catalogue search routing -->`);
-    }
-    if(parts.length) {
-      locHtml = `<div style="font-size:13.5px; margin-top:4px; display:flex; gap:16px;">${parts.join("")}</div>`;
+  if(r.locator) {
+    if(r.locator.type === "url") locHtml = `<a class="map-link" href="${r.locator.value}" target="_blank" rel="noopener">Source</a>`;
+    else if(r.locator.type === "doi") locHtml = `<a class="map-link" href="https://doi.org/${r.locator.value}" target="_blank" rel="noopener">DOI</a>`;
+    else if(r.locator.type === "online") locHtml = `<span>Library e-resource</span>`;
+    else if(r.locator.type === "shelfmark") locHtml = `<span style="user-select:text; cursor:text;">${r.locator.value}</span> <!-- TODO: Catalogue search routing -->`;
+    if(locHtml) {
+      locHtml = `<div style="font-size:13.5px; margin-top:4px;">${locHtml}</div>`;
     }
   }
 
   const checked = readingsState && readingsState[r.id] ? "checked" : "";
   return `
-    <div style="display:flex; gap:12px; align-items:flex-start; margin-bottom:12px;">
-      <input type="checkbox" onchange="window.toggleReading('${r.id}')" ${checked} style="margin-top:3px;width:18px;height:18px;cursor:pointer;">
-      <div style="flex:1;">
-        <div style="font-size:14.5px; line-height:1.4;">${statusBadge}${cite}</div>
+    <div class="reading-item">
+      <input type="checkbox" class="reading-checkbox" onchange="window.toggleReading('${r.id}')" ${checked}>
+      <div class="reading-body">
+        <div class="reading-cite">
+          ${statusBadge}
+          ${cite}
+        </div>
         ${locHtml}
       </div>
     </div>
@@ -373,7 +377,12 @@ function renderAcademicsRoute(path) {
 }
 
 function renderDeadlinesRoute(panel) {
-  const allDeads = getAllDeadlines().filter(x => x.t).sort((a,b) => a.t - b.t);
+  const allDeads = getAllDeadlines().sort((a,b) => {
+    if(!a.t && !b.t) return 0;
+    if(!a.t) return 1;
+    if(!b.t) return -1;
+    return a.t - b.t;
+  });
   const tasks = readState("spo.v1.tasks");
   
   let html = `<div style="padding-top:16px;">
@@ -383,13 +392,17 @@ function renderDeadlinesRoute(panel) {
   
   let currentMonth = "";
   for(const d of allDeads) {
-    const month = d.t.toLocaleDateString("en-GB", { month:"long", year:"numeric" });
+    const month = d.t ? d.t.toLocaleDateString("en-GB", { month:"long", year:"numeric" }) : "Unscheduled";
     if(month !== currentMonth) {
       html += `<h3 style="font-size:18px; margin:24px 0 12px; border-bottom:1px solid var(--hair); padding-bottom:8px;">${month}</h3>`;
       currentMonth = month;
     }
     const isDone = !!tasks[d.a.id];
-    const timeStr = d.a.provisional ? `<del>${fmtDate(d.t)}</del> (unconfirmed)` : fmtDate(d.t);
+    let timeStr = "No date";
+    if(d.t) {
+      timeStr = fmtDate(d.t);
+      if(d.a.provisional) timeStr = `<del>${timeStr}</del> <span class="course-unconfirmed">(Unconfirmed)</span>`;
+    }
     html += `
       <div style="background:var(--paper-2); padding:12px; border-radius:6px; display:flex; gap:12px; align-items:flex-start; margin-bottom:8px;">
         <input type="checkbox" onchange="window.toggleTask('${d.a.id}')" ${isDone?"checked":""} style="margin-top:3px;width:18px;height:18px;cursor:pointer;">
@@ -416,37 +429,92 @@ function renderAcademicsCourse(courseId, panel) {
   const now = new Date();
   const occs = occurrencesOf(course.scheduleId);
   const tasks = readState("spo.v1.tasks");
+  const readingsState = readState("spo.v1.readings");
   const sems = getAllSeminars().filter(x => x.course.id === course.id);
   const nextSem = sems.find(x => x.endT > now);
   
   let html = `<div style="padding-top:16px;">
-    <a href="#/academics" style="display:inline-block; margin-bottom:16px; text-decoration:none; color:var(--ink-soft); font-size:14.5px;">&larr; Back to Academics</a>
-    <h2 style="font-family:'Instrument Serif',serif; font-size:32px; font-weight:400; margin:0 0 8px; line-height:1.1;">${course.title}</h2>
-    <div style="font-size:15px; color:var(--ink-soft); margin-bottom:16px;">${course.code} · ${course.instructor || ""} ${course.provisional ? `<span style="color:var(--alert);font-weight:600;">· Unconfirmed</span>` : ""}</div>
+    <a href="#/academics" class="academics-back">&larr; Back to Academics</a>
+    <h2 class="course-title">${course.title}</h2>
+    <div class="course-meta">
+      ${course.code} 
+      ${course.instructor ? `· ${course.instructor}` : ""} 
+      ${course.instructorEmail ? `· <a href="mailto:${course.instructorEmail}">${course.instructorEmail}</a>` : ""}
+      ${course.provisional ? `<span class="course-unconfirmed">· Unconfirmed</span>` : ""}
+    </div>
   `;
+  
+  // Meeting pattern (from schedule)
+  const sched = window.SESSIONS.find(s => s.id === course.scheduleId);
+  if(sched) {
+    const loc = window.LOC[sched.loc];
+    html += `
+      <div style="font-size:14.5px; margin-bottom:16px;">
+        <strong>Meeting:</strong> ${DAYS[sched.dow]} ${sched.from}–${sched.to} · 
+        ${sched.room || ""} ${loc ? `· <a class="map-link" href="${loc.maps}" target="_blank" rel="noopener">${loc.name}</a>` : ""}
+      </div>
+    `;
+  }
+  if(course.syllabusUrl) html += `<div style="font-size:14.5px; margin-bottom:16px;"><strong>Syllabus:</strong> <a href="${course.syllabusUrl}" target="_blank" rel="noopener">Link</a></div>`;
+  if(course.lastUpdated) html += `<div style="font-size:13.5px; color:var(--ink-soft); margin-bottom:16px;">Last updated: ${course.lastUpdated}</div>`;
+
+  // Course notes
+  if(course.note) html += `<div class="course-note"><strong>Note:</strong> ${course.note}</div>`;
+  if(course.aiPolicyNote) html += `<div class="course-note"><strong>AI Policy:</strong> ${course.aiPolicyNote}</div>`;
+  if(course.citationStyleNote) html += `<div class="course-note"><strong>Citation Style:</strong> ${course.citationStyleNote}</div>`;
+  if(course.submissionNote) html += `<div class="course-note"><strong>Submission:</strong> ${course.submissionNote}</div>`;
   
   // Shelf
   if(course.shelf && course.shelf.length > 0) {
-    html += `<div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:24px;">`;
-    for(const link of course.shelf) {
-      html += `<a href="${link.url}" target="_blank" rel="noopener" style="display:inline-block; background:var(--paper-2); padding:6px 12px; border-radius:999px; text-decoration:none; color:var(--ink); font-size:13.5px;">${link.label}</a>`;
+    html += `<h3 class="section-head">Course Reading</h3>`;
+    const req = course.shelf.filter(r => r.status === "required");
+    const rec = course.shelf.filter(r => r.status !== "required");
+    
+    for(const r of req) {
+      html += renderReading(r, readingsState);
     }
-    html += `</div>`;
+    
+    if(rec.length > 0) {
+      if(rec.length > 3) {
+        html += `<details class="accordion-details"><summary class="accordion-summary" style="font-weight:600; font-size:14.5px;">Recommended (${rec.length})</summary><div class="accordion-content">`;
+      } else {
+        html += `<h4 class="sub-head" style="margin-top:16px;">Recommended</h4>`;
+      }
+      for(const r of rec) {
+        html += renderReading(r, readingsState);
+      }
+      if(rec.length > 3) html += `</div></details>`;
+    }
+    html += `<div style="margin-bottom:24px;"></div>`;
   }
   
   // Assessments
   if(course.assessments && course.assessments.length > 0) {
-    html += `<h3 style="font-family:'Instrument Serif',serif; font-size:22px; font-weight:400; margin:0 0 12px;">Assessments</h3>`;
+    html += `<h3 class="section-head">Assessments</h3>`;
     html += `<div style="display:grid; gap:8px; margin-bottom:32px;">`;
     for(const a of course.assessments) {
       const isDone = !!tasks[a.id];
-      const dueStr = a.due ? fmtDate(new Date(a.due)) : "No date";
+      // Include time in fmtDate by custom formatting if due exists
+      let dueStr = "No date";
+      if(a.due) {
+        const d = new Date(a.due);
+        dueStr = fmtDate(d) + " at " + d.toLocaleTimeString("en-GB", {hour:'2-digit', minute:'2-digit'});
+      }
+      if(a.provisional) dueStr = `<del>${dueStr}</del> <span class="course-unconfirmed">(Unconfirmed)</span>`;
+      
       html += `
-        <div style="display:flex; gap:12px; align-items:center; background:var(--paper-2); padding:10px 14px; border-radius:6px;">
-          <input type="checkbox" onchange="window.toggleTask('${a.id}')" ${isDone?"checked":""} style="width:18px;height:18px;cursor:pointer;">
-          <div style="flex:1;">
-            <div style="font-size:14.5px; font-weight:500;">${a.title}</div>
-            <div style="font-size:13px; color:var(--ink-soft);">${a.weight !== null ? a.weight+"%" : "Unknown weight"} · Due: ${a.provisional ? `<del>${dueStr}</del> <span style="color:var(--alert);font-weight:600;">(Unconfirmed)</span>` : dueStr}</div>
+        <div style="display:flex; gap:12px; align-items:flex-start; background:var(--paper-2); padding:10px 14px; border-radius:6px;">
+          <input type="checkbox" onchange="window.toggleTask('${a.id}')" ${isDone?"checked":""} style="width:18px;height:18px;cursor:pointer;margin-top:3px;">
+          <div>
+            <div style="font-size:15px; font-weight:500; margin-bottom:2px;">${a.title}</div>
+            <div style="font-size:13.5px; color:var(--ink-soft); margin-bottom:4px;">
+              ${a.weight !== null ? a.weight+"%" : "Unknown weight"} · ${dueStr}
+              ${a.channel ? ` · ${a.channel}` : ""}
+              ${a.group ? ` · <strong>Group work</strong>` : ""}
+            </div>
+            ${a.note ? `<div style="font-size:13.5px; margin-bottom:4px;">${a.note}</div>` : ""}
+            ${a.dueNote ? `<div style="font-size:13.5px; color:var(--ink-soft); font-style:italic;">${a.dueNote}</div>` : ""}
+            ${a.warn ? `<div style="font-size:13.5px; color:var(--alert); font-weight:600; margin-top:4px;">⚠️ ${a.warn}</div>` : ""}
           </div>
         </div>
       `;
@@ -456,7 +524,7 @@ function renderAcademicsCourse(courseId, panel) {
   
   // Seminars
   if(course.seminars && course.seminars.length > 0) {
-    html += `<h3 style="font-family:'Instrument Serif',serif; font-size:22px; font-weight:400; margin:0 0 12px;">Seminars</h3>`;
+    html += `<h3 class="section-head">Seminars</h3>`;
     html += `<div style="display:flex; flex-direction:column; gap:12px;">`;
     
     let nextN = nextSem ? nextSem.sem.n : -1;
@@ -464,61 +532,114 @@ function renderAcademicsCourse(courseId, panel) {
     for(const semObj of sems) {
       const sem = semObj.sem;
       const isOpen = sem.n === nextN;
-      html += `<details ${isOpen ? "open" : ""} style="background:var(--paper-2); border-radius:6px; padding:12px 16px;">
-        <summary style="cursor:pointer; font-weight:500; font-size:15.5px; outline:none;">
-          Session ${sem.n}: ${sem.title || "No title"}
-          <div style="font-size:13.5px; font-weight:400; color:var(--ink-soft); margin-top:2px;">
-            ${sem.provisional ? `<del>${fmtDate(semObj.d)}</del> <span style="color:var(--alert);font-weight:600;">(Unconfirmed)</span>` : fmtDate(semObj.d)}
+      
+      const semTitle = sem.title ? sem.title : `Session ${sem.n}`;
+      
+      html += `<details ${isOpen ? "open" : ""} class="accordion-details">
+        <summary class="accordion-summary">
+          <div class="sem-title-box">
+            <h4 class="sem-title">
+              ${sem.provisional ? `<span class="course-unconfirmed">(Unconfirmed)</span> ` : ""}
+              Session ${sem.n}: ${semTitle}
+            </h4>
           </div>
+          <div class="sem-date">${fmtDate(semObj.d)}</div>
         </summary>
-        <div style="padding-top:12px; margin-top:12px; border-top:1px dotted var(--hair); font-size:14.5px;">
+        <div class="accordion-content">
       `;
-      if(sem.part) html += `<div style="margin-bottom:8px; font-weight:600; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.05em; font-size:12px;">Part ${sem.part}</div>`;
-      if(sem.note) html += `<div style="margin-bottom:12px; font-style:italic;">Note: ${sem.note}</div>`;
-      if(sem.themes) {
-        html += `<div style="margin-bottom:12px;"><b>Themes:</b> ${sem.themes.join(" · ")}</div>`;
+      
+      if(sem.deadlineHere) {
+        const a = course.assessments.find(a => a.id === sem.deadlineHere);
+        if(a) html += `<div class="deadline-inline">Due today: ${a.title}</div>`;
       }
+      if(sem.deadlineSoon) {
+        const a = course.assessments.find(a => a.id === sem.deadlineSoon);
+        if(a) html += `<div class="deadline-inline">Due soon: ${a.title}</div>`;
+      }
+      
+      if(sem.part) html += `<div style="margin-bottom:8px; font-weight:600; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.05em; font-size:12px;">Part ${sem.part}</div>`;
+      if(sem.note) html += `<div style="margin-bottom:12px; font-style:italic; font-size:14.5px;">Note: ${sem.note}</div>`;
+      if(sem.themes) html += `<div style="margin-bottom:12px; font-size:14.5px;"><strong>Themes:</strong> ${sem.themes.join(" · ")}</div>`;
       
       // Readings
       if(sem.readings && sem.readings.length > 0) {
-        html += `<div style="margin-bottom:16px;"><h4 style="margin:0 0 8px; font-size:15px;">Readings</h4>`;
+        html += `<div style="margin-bottom:16px;"><h4 class="sub-head">Readings</h4>`;
         for(const r of sem.readings) {
           html += renderReading(r, readingsState);
         }
         html += `</div>`;
       }
+      
       if(sem.briefings && sem.briefings.length > 0) {
-        html += `<div style="margin-bottom:12px;"><b>Briefings:</b><ul>`;
+        html += `<div style="margin-bottom:16px;"><h4 class="sub-head">Briefings</h4>`;
         for(const b of sem.briefings) {
-          html += `<li>${b.student}: ${b.topic}</li>`;
+          html += `<div class="briefing-item"><strong>${b.no}.</strong> ${b.question}`;
+          if(!b.readings || b.readings.length === 0) {
+            html += `<span class="briefing-note">(reading list not yet entered)</span>`;
+          }
+          html += `</div>`;
         }
-        html += `</ul></div>`;
+        html += `</div>`;
       }
-      if(sem.strands && sem.strands.length > 0) {
-        html += `<div style="margin-bottom:12px;"><b>Strands:</b><ul>`;
-        for(const s of sem.strands) {
-          html += `<li>${s.student}: ${s.topic}</li>`;
+      
+      if(sem.strands && Object.keys(sem.strands).length > 0) {
+        html += `<div style="margin-bottom:16px;">`;
+        const order = ["news", "tech", "society", "demo", "actors", "admin"];
+        for(const key of order) {
+          const items = sem.strands[key];
+          if(items && items.length > 0) {
+            html += `<div class="strand-group"><div class="strand-label">${key}</div><ul class="strand-list">`;
+            for(const item of items) {
+              if(item === "tbd") {
+                html += `<li class="strand-tbd">tbd</li>`;
+              } else {
+                html += `<li>${item}</li>`;
+              }
+            }
+            html += `</ul></div>`;
+          }
         }
-        html += `</ul></div>`;
+        html += `</div>`;
       }
+      
       if(sem.links && sem.links.length > 0) {
-        html += `<div style="margin-bottom:12px;"><b>Links:</b><ul>`;
+        html += `<div style="margin-bottom:12px; font-size:14.5px;"><strong>Links:</strong><ul>`;
         for(const l of sem.links) {
           html += `<li><a href="${l.url}" target="_blank" rel="noopener">${l.label}</a></li>`;
         }
         html += `</ul></div>`;
       }
+      
       if(sem.media && sem.media.length > 0) {
-        html += `<div style="margin-bottom:12px;"><b>Media:</b><ul>`;
+        html += `<div style="margin-bottom:16px;"><h4 class="sub-head" style="margin-bottom:4px;">Media</h4>`;
         for(const m of sem.media) {
-          html += `<li><a href="${m.url}" target="_blank" rel="noopener">${m.title}</a> (${m.type})</li>`;
+          html += `<div class="media-item"><span class="media-type">${m.type}:</span>${m.title}</div>`;
         }
-        html += `</ul></div>`;
+        html += `</div>`;
       }
       
       html += `</div></details>`;
     }
     html += `</div>`;
+  }
+  
+  // Footer blocks (todo, unscheduled, extraSessions)
+  let footerHtml = "";
+  if(course.todo) footerHtml += `<div class="course-note"><strong>TODO:</strong> ${course.todo}</div>`;
+  if(course.unscheduled && course.unscheduled.length > 0) {
+    footerHtml += `<div class="course-note"><strong>Unscheduled:</strong><ul style="margin:4px 0 0; padding-left:20px;">`;
+    for(const u of course.unscheduled) footerHtml += `<li>${u}</li>`;
+    footerHtml += `</ul></div>`;
+  }
+  if(course.extraSessions && course.extraSessions.length > 0) {
+    footerHtml += `<div class="course-note"><strong>Extra Sessions:</strong><ul style="margin:4px 0 0; padding-left:20px;">`;
+    for(const ex of course.extraSessions) {
+      footerHtml += `<li>${ex.date} ${ex.from}-${ex.to} (${ex.room}): ${ex.label} ${ex.provisional ? '<span class="course-unconfirmed">(Unconfirmed)</span>' : ''} - <em>${ex.note || ""}</em></li>`;
+    }
+    footerHtml += `</ul></div>`;
+  }
+  if(footerHtml) {
+    html += `<h3 class="section-head" style="margin-top:32px;">Not yet placed</h3>${footerHtml}`;
   }
   
   html += `</div>`;
@@ -582,9 +703,12 @@ function renderAcademicsLanding(panel) {
   const allDeads = getAllDeadlines();
   // filter out past OR ticked deadlines for the top 4? The brief says "The next four assessments by due... Anything within 7 days is emphasised; anything overdue and unticked is emphasised more strongly."
   // Wait, overdue AND unticked implies past deadlines are included if unticked!
-  const sortedDeads = allDeads
-    .filter(x => x.t) // must have a date
-    .sort((a,b) => a.t - b.t);
+  const sortedDeads = allDeads.sort((a,b) => {
+    if(!a.t && !b.t) return 0;
+    if(!a.t) return 1;
+    if(!b.t) return -1;
+    return a.t - b.t;
+  });
   
   // To find next 4, we might want the first 4 that are (future OR (past and unticked)).
   const relevantDeads = sortedDeads.filter(x => x.t > now || !tasks[x.a.id]).slice(0,4);
@@ -592,11 +716,16 @@ function renderAcademicsLanding(panel) {
     html += `<div style="display:grid; gap:12px;">`;
     for(const d of relevantDeads) {
       const isDone = !!tasks[d.a.id];
-      const days = (d.t - now) / (1000*60*60*24);
+      const days = d.t ? (d.t - now) / (1000*60*60*24) : Infinity;
       let emClass = "";
       if(!isDone && days < 0) emClass = `color:var(--alert); font-weight:600;`;
       else if(!isDone && days < 7) emClass = `font-weight:600;`;
-      const timeStr = d.a.provisional ? `<del>${fmtDate(d.t)}</del> (unconfirmed)` : fmtDate(d.t);
+      
+      let timeStr = "No date";
+      if(d.t) {
+        timeStr = fmtDate(d.t);
+        if(d.a.provisional) timeStr = `<del>${timeStr}</del> <span class="course-unconfirmed">(Unconfirmed)</span>`;
+      }
       html += `
         <div style="background:var(--paper-2); padding:12px; border-radius:6px; display:flex; gap:12px; align-items:flex-start; ${emClass}">
           <input type="checkbox" onchange="window.toggleTask('${d.a.id}')" ${isDone?"checked":""} style="margin-top:3px;width:18px;height:18px;cursor:pointer;">
@@ -720,11 +849,9 @@ tablist.addEventListener("keydown", (e) => {
 handleRoute();
 setInterval(() => {
   const route = parseHash();
+  renderHero(new Date());
   if (route.tab === "week") {
-    tick();
-  } else {
-    renderHero(new Date());
-    renderAcademicsRoute(route.path);
+    renderWeek(new Date());
   }
 }, 30000);
 
