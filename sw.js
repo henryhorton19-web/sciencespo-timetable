@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spo-v4';
+const CACHE_NAME = 'spo-v5';
 const urlsToCache = [
   './',
   './index.html',
@@ -27,6 +27,7 @@ self.addEventListener('fetch', event => {
                          url.pathname.endsWith('/app.js') || 
                          url.pathname.endsWith('/data-schedule.js') || 
                          url.pathname.endsWith('/data-courses.js') ||
+                         url.pathname.endsWith('/styles.css') ||
                          url.pathname.endsWith('/index.html') ||
                          url.pathname.endsWith('/');
 
