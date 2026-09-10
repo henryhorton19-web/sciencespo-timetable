@@ -10,13 +10,76 @@ const mondayOf = d => addDays(d, -((d.getDay()+6)%7));
 const DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
 const fmtDate = d => d.toLocaleDateString("en-GB",{day:"numeric",month:"long"});
 
+function occurrencesOf(scheduleId) {
+  const sess = SESSIONS.find(s => s.id === scheduleId);
+  if(!sess) return [];
+  const out = [];
+  for(const [a, b] of sess.ranges) {
+    let d = parse(a);
+    const end = parse(b);
+    while(d <= end) {
+      if(((d.getDay()+6)%7 + 1) === sess.dow) {
+        out.push(new Date(d));
+      }
+      d.setDate(d.getDate() + 1);
+    }
+  }
+  return out;
+}
+
+function seminarDate(course, n) {
+  const occs = occurrencesOf(course.scheduleId);
+  return occs[n-1] || null;
+}
+
+// Temporary debug validation (as requested)
+function validateDates() {
+  if (!window.COURSES) return;
+  for (const c of window.COURSES) {
+    const occs = occurrencesOf(c.scheduleId);
+    if (occs.length !== 12 && !c.extraSessions) console.warn(`WARN: ${c.code} has ${occs.length} occurrences instead of 12!`);
+    if (c.seminars) {
+      for (const sem of c.seminars) {
+        if (sem.assertDate) {
+          const derived = occs[sem.n - 1];
+          if (!derived) {
+            console.warn(`WARN: ${c.code} seminar ${sem.n} missing derived date!`);
+          } else if (key(derived) !== sem.assertDate) {
+            console.warn(`WARN: ${c.code} seminar ${sem.n} mismatch! assertDate=${sem.assertDate}, derived=${key(derived)}`);
+          }
+        }
+      }
+    }
+  }
+}
+validateDates();
+
 function sessionsOn(date){
   const k = key(date), dow = (date.getDay()+6)%7 + 1;
   const out = [];
   for(const s of SESSIONS){
     if(s.dow !== dow) continue;
     const on = s.ranges.some(([a,b]) => k >= a && k <= b);
-    if(on) out.push(s);
+    if(on) {
+      let from = s.from, to = s.to, note = null;
+      if (window.COURSES) {
+        for (const c of window.COURSES) {
+          if (c.scheduleId === s.id && c.seminars) {
+            const occs = occurrencesOf(s.id);
+            const idx = occs.findIndex(d => key(d) === k);
+            if (idx !== -1) {
+              const sem = c.seminars.find(x => x.n === idx + 1);
+              if (sem && sem.timeOverride) {
+                from = sem.timeOverride.from;
+                to = sem.timeOverride.to;
+                note = "Time changed";
+              }
+            }
+          }
+        }
+      }
+      out.push({...s, from, to, _overrideNote: note});
+    }
   }
   return out.sort((a,b) => a.from.localeCompare(b.from));
 }
@@ -90,6 +153,7 @@ function renderWeek(now){
             <h3>${s.name} ${live?'<span class="badge">now</span>':''}
               ${s.code ? `<span class="code">${s.code}</span>` : ""}</h3>
             <div class="addr"><a class="map-link" target="_blank" rel="noopener" style="text-decoration-color:${LOC[s.loc].colour}" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(LOC[s.loc].address)}">${LOC[s.loc].name}</a>${s.room ? ` · <span class="room">${s.room}</span>` : ""}</div>
+            ${s._overrideNote ? `<div class="flag">${s._overrideNote}</div>` : ""}
             ${s.flag ? `<div class="flag">${s.flag}</div>` : ""}
           </div>
         </div>`;
