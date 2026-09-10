@@ -202,6 +202,28 @@ function writeState(key, val) {
   try { localStorage.setItem(key, JSON.stringify(val)); }
   catch(e) {}
 }
+function toggleState(namespace, id) {
+  const state = readState(namespace);
+  if(state[id]) delete state[id];
+  else state[id] = true;
+  writeState(namespace, state);
+  handleRoute();
+}
+window.toggleTask = id => toggleState("spo.v1.tasks", id);
+window.toggleReading = id => toggleState("spo.v1.readings", id);
+window.loadSyncData = () => {
+  try {
+    const data = JSON.parse(document.getElementById("syncData").value);
+    if(data["spo.v1.readings"]) writeState("spo.v1.readings", data["spo.v1.readings"]);
+    if(data["spo.v1.tasks"]) writeState("spo.v1.tasks", data["spo.v1.tasks"]);
+    if(data["spo.v1.briefing"]) writeState("spo.v1.briefing", data["spo.v1.briefing"]);
+    if(data["spo.v1.prefs"]) writeState("spo.v1.prefs", data["spo.v1.prefs"]);
+    alert("Data loaded successfully.");
+    handleRoute();
+  } catch(e) {
+    alert("Failed to parse data. Make sure it's valid JSON.");
+  }
+}
 
 function getAllSeminars() {
   const all = [];
@@ -270,7 +292,7 @@ function renderReading(r, readingsState) {
   const checked = readingsState && readingsState[r.id] ? "checked" : "";
   return `
     <div style="display:flex; gap:12px; align-items:flex-start; margin-bottom:12px;">
-      <input type="checkbox" disabled ${checked} style="margin-top:3px;width:18px;height:18px;cursor:pointer;">
+      <input type="checkbox" onchange="window.toggleReading('${r.id}')" ${checked} style="margin-top:3px;width:18px;height:18px;cursor:pointer;">
       <div style="flex:1;">
         <div style="font-size:14.5px; line-height:1.4;">${statusBadge}${cite}</div>
         ${locHtml}
@@ -328,7 +350,7 @@ function renderAcademicsCourse(courseId, panel) {
       const dueStr = a.due ? fmtDate(new Date(a.due)) : "No date";
       html += `
         <div style="display:flex; gap:12px; align-items:center; background:var(--paper-2); padding:10px 14px; border-radius:6px;">
-          <input type="checkbox" disabled ${isDone?"checked":""} style="width:18px;height:18px;">
+          <input type="checkbox" onchange="window.toggleTask('${a.id}')" ${isDone?"checked":""} style="width:18px;height:18px;cursor:pointer;">
           <div style="flex:1;">
             <div style="font-size:14.5px; font-weight:500;">${a.title}</div>
             <div style="font-size:13px; color:var(--ink-soft);">${a.weight !== null ? a.weight+"%" : "Unknown weight"} · Due: ${a.provisional ? `<del>${dueStr}</del> <span style="color:var(--alert);font-weight:600;">(Unconfirmed)</span>` : dueStr}</div>
@@ -441,7 +463,7 @@ function renderAcademicsLanding(panel) {
       for(const r of reqs) {
         const checked = readingsState[r.id] ? "checked" : "";
         html += `<label style="display:flex; gap:12px; align-items:flex-start; font-size:14px; cursor:pointer;">
-          <input type="checkbox" disabled ${checked} style="margin-top:3px;width:18px;height:18px;">
+          <input type="checkbox" onchange="window.toggleReading('${r.id}')" ${checked} style="margin-top:3px;width:18px;height:18px;">
           <div>${r.author}. <i>${r.title}</i>.</div>
         </label>`;
       }
@@ -477,7 +499,7 @@ function renderAcademicsLanding(panel) {
       const timeStr = d.a.provisional ? `<del>${fmtDate(d.t)}</del> (unconfirmed)` : fmtDate(d.t);
       html += `
         <div style="background:var(--paper-2); padding:12px; border-radius:6px; display:flex; gap:12px; align-items:flex-start; ${emClass}">
-          <input type="checkbox" disabled ${isDone?"checked":""} style="margin-top:3px;width:18px;height:18px;">
+          <input type="checkbox" onchange="window.toggleTask('${d.a.id}')" ${isDone?"checked":""} style="margin-top:3px;width:18px;height:18px;cursor:pointer;">
           <div>
             <div style="font-size:13.5px; color:var(--ink-soft); margin-bottom:2px;">${d.course.code} · ${timeStr}</div>
             <div style="font-size:15px; margin-bottom:2px;">${d.a.title}</div>
@@ -527,6 +549,21 @@ function renderAcademicsLanding(panel) {
     html += `</div>`;
   }
   html += `</div>`;
+  
+  // 4. Data Sync
+  const allState = {
+    "spo.v1.readings": readingsState,
+    "spo.v1.tasks": tasks,
+    "spo.v1.briefing": readState("spo.v1.briefing"),
+    "spo.v1.prefs": readState("spo.v1.prefs")
+  };
+  
+  html += `<div style="margin-top:40px; border-top:2px solid var(--plaque); padding-top:20px;">
+    <h3 style="font-family:'Instrument Serif',serif; font-size:22px; font-weight:400; margin:0 0 12px;">Data Sync</h3>
+    <p style="font-size:14px; color:var(--ink-soft); margin-bottom:12px;">Your progress is stored locally on this device. You can copy this JSON to move it to another device.</p>
+    <textarea id="syncData" style="width:100%; height:80px; font-family:monospace; font-size:12px; padding:8px; margin-bottom:8px; border:1px solid var(--hair); border-radius:4px;">${JSON.stringify(allState)}</textarea>
+    <button onclick="window.loadSyncData()" class="solid">Load Data</button>
+  </div>`;
   
   html += `</div>`;
   panel.innerHTML = html;
