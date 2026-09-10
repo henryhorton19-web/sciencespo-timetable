@@ -640,6 +640,9 @@ function renderAcademicsCourse(courseId, panel) {
         html += `<div style="margin-bottom:16px;"><h4 class="sub-head">Briefings</h4>`;
         for(const b of sem.briefings) {
           html += `<div class="briefing-item"><strong>${b.no}.</strong> ${b.question}`;
+          if(b.assigned) {
+            html += ` <span style="display:inline-block; font-size:11px; font-weight:600; text-transform:uppercase; background:var(--accent); color:#fff; padding:1px 6px; border-radius:4px; margin-left:6px; vertical-align:middle;">Your Briefing</span>`;
+          }
           if(!b.readings || b.readings.length === 0) {
             html += `<span class="briefing-note">(reading list not yet entered)</span>`;
           }

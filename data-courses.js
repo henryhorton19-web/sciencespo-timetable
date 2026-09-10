@@ -45,8 +45,9 @@ window.COURSES = [
 
   assessments: [
     { id:"dspo-a1", type:"oral", title:"Briefing (oral presentation)",
-      weight:35, due:null, dueNote:"Date set by which briefing you take",
-      channel:"In class", provisional:true },
+      weight:35, due:"2026-10-22T19:15",
+      note:"Briefing 12: Drones and ethics: towards a new law of war?",
+      channel:"In class" },
     { id:"dspo-a2", type:"participation",
       title:"Oral participation and session 8 dissertation",
       weight:25, due:"2026-11-05T19:15", channel:"In class",
@@ -179,12 +180,13 @@ window.COURSES = [
       ],
       briefings:[
         { no:11, question:"Are drones a game changer?", readings:[] },
-        { no:12, question:"Drones and ethics: towards a new law of war?", readings:[] }
+        { no:12, question:"Drones and ethics: towards a new law of war?", readings:[], assigned:true }
       ],
       media:[
         { type:"film", title:"Gavin Hood, Eye in the Sky, 2015" },
         { type:"song", title:"Alan Parsons Project, Eye in the Sky, 1982" }
-      ] },
+      ],
+      deadlineHere:"dspo-a1" },
 
     { n:8, assertDate:"2026-11-05",
       title:"Test, and Technology, Coercion and International Conflict",

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spo-v5';
+const CACHE_NAME = 'spo-v6';
 const urlsToCache = [
   './',
   './index.html',
