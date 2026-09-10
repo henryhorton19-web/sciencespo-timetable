@@ -351,45 +351,57 @@ function getAllDeadlines() {
   return all;
 }
 
-function renderReading(r, readingsState) {
-  const badgeClass = r.status === "required" 
-    ? `class="reading-badge required"`
-    : `class="reading-badge recommended"`;
-  const statusBadge = `<span ${badgeClass}>${r.status}</span>`;
+function renderReading(r, readingsState, inGroup = false) {
+  let citeParts = [];
+  if(r.author) citeParts.push(`<span style="font-weight:500;">${r.author}</span>`);
   
-  let cite = ``;
-  if(r.author) cite += `<span style="font-weight:500;">${r.author}</span>. `;
-  if(r.title) cite += `<i>${r.title}</i>. `;
-  if(r.container || r.publisher) cite += `${r.container || r.publisher}. `;
-  if(r.volume) cite += `${r.volume}`;
-  if(r.issue) cite += `(${r.issue})`;
-  if(r.volume || r.issue) cite += `. `;
-  if(r.year) cite += `${r.year}. `;
-  if(r.pages) cite += `pp. ${r.pages}. `;
+  let titleHtml = "";
+  if (r.container) {
+    titleHtml = `"${r.title}"`;
+  } else {
+    titleHtml = `<i>${r.title}</i>`;
+  }
+  if (titleHtml) citeParts.push(titleHtml);
+  
+  if (r.container) citeParts.push(`<i>${r.container}</i>`);
+  
+  let volIssue = "";
+  if(r.volume) volIssue += r.volume;
+  if(r.issue) volIssue += `(${r.issue})`;
+  if(volIssue) citeParts.push(volIssue);
+  
+  if(r.publisher) citeParts.push(r.publisher);
+  if(r.year) citeParts.push(r.year);
+  if(r.pages) citeParts.push(`pp. ${r.pages.replace('-', '–')}`);
+  
+  let cite = citeParts.join(", ") + ".";
+  
+  if (!inGroup && r.status === "recommended") {
+    cite += ` <span class="reading-recommended-label">(recommended)</span>`;
+  }
   
   let locHtml = "";
   if(r.locator) {
-    if(r.locator.type === "url") locHtml = `<a class="map-link" href="${r.locator.value}" target="_blank" rel="noopener">Source</a>`;
-    else if(r.locator.type === "doi") locHtml = `<a class="map-link" href="https://doi.org/${r.locator.value}" target="_blank" rel="noopener">DOI</a>`;
+    if(r.locator.type === "url") locHtml = `<a class="map-link" href="${r.locator.value}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Source</a>`;
+    else if(r.locator.type === "doi") locHtml = `<a class="map-link" href="https://doi.org/${r.locator.value}" target="_blank" rel="noopener" onclick="event.stopPropagation()">DOI: ${r.locator.value}</a>`;
     else if(r.locator.type === "online") locHtml = `<span>Library e-resource</span>`;
-    else if(r.locator.type === "shelfmark") locHtml = `<span style="user-select:text; cursor:text;">${r.locator.value}</span> <!-- TODO: Catalogue search routing -->`;
+    else if(r.locator.type === "shelfmark") locHtml = `<span style="user-select:text; cursor:text;" onclick="event.stopPropagation()">Library shelfmark ${r.locator.value}</span> <!-- TODO: Catalogue search routing -->`;
     if(locHtml) {
-      locHtml = `<div style="font-size:13.5px; margin-top:4px;">${locHtml}</div>`;
+      locHtml = `<div style="font-size:13.5px; margin-top:4px; color:var(--ink-soft);">${locHtml}</div>`;
     }
   }
 
   const checked = readingsState && readingsState[r.id] ? "checked" : "";
   return `
-    <div class="reading-item">
+    <label class="reading-item">
       <input type="checkbox" class="reading-checkbox" onchange="window.toggleReading('${r.id}')" ${checked}>
       <div class="reading-body">
         <div class="reading-cite">
-          ${statusBadge}
           ${cite}
         </div>
         ${locHtml}
       </div>
-    </div>
+    </label>
   `;
 }
 
@@ -485,7 +497,10 @@ function renderAcademicsCourse(courseId, panel) {
     `;
   }
   if(course.syllabusUrl) html += `<div style="font-size:14.5px; margin-bottom:16px;"><strong>Syllabus:</strong> <a href="${course.syllabusUrl}" target="_blank" rel="noopener">Link</a></div>`;
-  if(course.lastUpdated) html += `<div style="font-size:13.5px; color:var(--ink-soft); margin-bottom:16px;">Last updated: ${course.lastUpdated}</div>`;
+  if(course.lastUpdated) {
+    const d = new Date(course.lastUpdated);
+    html += `<div style="font-size:13.5px; color:var(--ink-soft); margin-bottom:16px;">Last updated: ${fmtDate(d)} ${d.getFullYear()}</div>`;
+  }
 
   // Course notes
   // Course notes
@@ -521,7 +536,7 @@ function renderAcademicsCourse(courseId, panel) {
     const rec = course.shelf.filter(r => r.status !== "required");
     
     for(const r of req) {
-      html += renderReading(r, readingsState);
+      html += renderReading(r, readingsState, true);
     }
     
     if(rec.length > 0) {
@@ -531,7 +546,7 @@ function renderAcademicsCourse(courseId, panel) {
         html += `<h4 class="sub-head" style="margin-top:16px;">Recommended</h4>`;
       }
       for(const r of rec) {
-        html += renderReading(r, readingsState);
+        html += renderReading(r, readingsState, true);
       }
       if(rec.length > 3) html += `</div></details>`;
     }
