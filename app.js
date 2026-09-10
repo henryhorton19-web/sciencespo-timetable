@@ -241,6 +241,44 @@ function getAllDeadlines() {
   return all;
 }
 
+function renderReading(r, readingsState) {
+  const isReq = r.status === "required";
+  const badgeClass = isReq ? `style="background:var(--alert);color:#fff;padding:1px 6px;border-radius:4px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.02em;margin-right:6px;vertical-align:1px;"` 
+                           : `style="background:var(--hair);color:var(--ink);padding:1px 6px;border-radius:4px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.02em;margin-right:6px;vertical-align:1px;"`;
+  const statusBadge = `<span ${badgeClass}>${r.status}</span>`;
+  
+  let cite = ``;
+  if(r.author) cite += `<span style="font-weight:500;">${r.author}</span>. `;
+  if(r.year) cite += `(${r.year}). `;
+  if(r.title) cite += `<i>${r.title}</i>. `;
+  if(r.publication) cite += `${r.publication}. `;
+  
+  let locHtml = "";
+  if(r.locators) {
+    const parts = [];
+    if(r.locators.url) parts.push(`<a class="map-link" href="${r.locators.url}" target="_blank" rel="noopener">Source</a>`);
+    if(r.locators.doi) parts.push(`<a class="map-link" href="${r.locators.doi}" target="_blank" rel="noopener">DOI</a>`);
+    if(r.locators.online) parts.push(`<a class="map-link" href="${r.locators.online}" target="_blank" rel="noopener">Catalogue</a>`);
+    if(r.locators.shelfmark) {
+      parts.push(`<span style="user-select:text; cursor:text;">${r.locators.shelfmark}</span> <!-- TODO: Catalogue search routing -->`);
+    }
+    if(parts.length) {
+      locHtml = `<div style="font-size:13.5px; margin-top:4px; display:flex; gap:16px;">${parts.join("")}</div>`;
+    }
+  }
+
+  const checked = readingsState && readingsState[r.id] ? "checked" : "";
+  return `
+    <div style="display:flex; gap:12px; align-items:flex-start; margin-bottom:12px;">
+      <input type="checkbox" disabled ${checked} style="margin-top:3px;width:18px;height:18px;cursor:pointer;">
+      <div style="flex:1;">
+        <div style="font-size:14.5px; line-height:1.4;">${statusBadge}${cite}</div>
+        ${locHtml}
+      </div>
+    </div>
+  `;
+}
+
 function renderAcademicsRoute(path) {
   const panel = document.getElementById("panel-academics");
   if (!path.length || path[0] === "") {
@@ -324,13 +362,13 @@ function renderAcademicsCourse(courseId, panel) {
         html += `<div style="margin-bottom:12px;"><b>Themes:</b> ${sem.themes.join(" · ")}</div>`;
       }
       
-      // Readings placeholder for step 6
+      // Readings
       if(sem.readings && sem.readings.length > 0) {
-        html += `<div style="margin-bottom:12px;"><b>Readings:</b><ul>`;
+        html += `<div style="margin-bottom:16px;"><h4 style="margin:0 0 8px; font-size:15px;">Readings</h4>`;
         for(const r of sem.readings) {
-          html += `<li>${r.author}. <i>${r.title}</i>. (${r.status})</li>`;
+          html += renderReading(r, readingsState);
         }
-        html += `</ul></div>`;
+        html += `</div>`;
       }
       if(sem.briefings && sem.briefings.length > 0) {
         html += `<div style="margin-bottom:12px;"><b>Briefings:</b><ul>`;
