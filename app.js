@@ -307,7 +307,7 @@ function renderAcademicsCourse(courseId, panel) {
   let html = `<div style="padding-top:16px;">
     <a href="#/academics" style="display:inline-block; margin-bottom:16px; text-decoration:none; color:var(--ink-soft); font-size:14.5px;">&larr; Back to Academics</a>
     <h2 style="font-family:'Instrument Serif',serif; font-size:32px; font-weight:400; margin:0 0 8px; line-height:1.1;">${course.title}</h2>
-    <div style="font-size:15px; color:var(--ink-soft); margin-bottom:16px;">${course.code} · ${course.instructor || ""}</div>
+    <div style="font-size:15px; color:var(--ink-soft); margin-bottom:16px;">${course.code} · ${course.instructor || ""} ${course.provisional ? `<span style="color:var(--alert);font-weight:600;">· Unconfirmed</span>` : ""}</div>
   `;
   
   // Shelf
@@ -331,7 +331,7 @@ function renderAcademicsCourse(courseId, panel) {
           <input type="checkbox" disabled ${isDone?"checked":""} style="width:18px;height:18px;">
           <div style="flex:1;">
             <div style="font-size:14.5px; font-weight:500;">${a.title}</div>
-            <div style="font-size:13px; color:var(--ink-soft);">${a.weight !== null ? a.weight+"%" : "Unknown weight"} · Due: ${dueStr}</div>
+            <div style="font-size:13px; color:var(--ink-soft);">${a.weight !== null ? a.weight+"%" : "Unknown weight"} · Due: ${a.provisional ? `<del>${dueStr}</del> <span style="color:var(--alert);font-weight:600;">(Unconfirmed)</span>` : dueStr}</div>
           </div>
         </div>
       `;
@@ -352,7 +352,9 @@ function renderAcademicsCourse(courseId, panel) {
       html += `<details ${isOpen ? "open" : ""} style="background:var(--paper-2); border-radius:6px; padding:12px 16px;">
         <summary style="cursor:pointer; font-weight:500; font-size:15.5px; outline:none;">
           Session ${sem.n}: ${sem.title || "No title"}
-          <div style="font-size:13.5px; font-weight:400; color:var(--ink-soft); margin-top:2px;">${fmtDate(semObj.d)}</div>
+          <div style="font-size:13.5px; font-weight:400; color:var(--ink-soft); margin-top:2px;">
+            ${sem.provisional ? `<del>${fmtDate(semObj.d)}</del> <span style="color:var(--alert);font-weight:600;">(Unconfirmed)</span>` : fmtDate(semObj.d)}
+          </div>
         </summary>
         <div style="padding-top:12px; margin-top:12px; border-top:1px dotted var(--hair); font-size:14.5px;">
       `;
@@ -513,7 +515,7 @@ function renderAcademicsLanding(panel) {
       
       html += `
         <a href="#/academics/${c.id}" style="display:block; text-decoration:none; color:inherit; background:var(--paper-2); padding:16px; border-radius:6px; border-left:4px solid ${locObj?locObj.colour:'var(--hair)'}">
-          <h3 style="margin:0 0 4px; font-size:17px;">${c.title}</h3>
+          <h3 style="margin:0 0 4px; font-size:17px;">${c.title} ${c.provisional ? `<span style="font-family:'Instrument Sans',sans-serif;font-size:11px;background:var(--alert);color:#fff;padding:2px 6px;border-radius:4px;vertical-align:middle;margin-left:6px;font-weight:600;">UNCONFIRMED</span>` : ""}</h3>
           <div style="font-size:14.5px; color:var(--ink-soft); margin-bottom:12px;">${c.instructor || ""}</div>
           <div style="display:flex; justify-content:space-between; font-size:13.5px; color:var(--ink-soft);">
             <span>${cNext ? "Next: " + fmtDate(cNext.d) : "Finished"}</span>
