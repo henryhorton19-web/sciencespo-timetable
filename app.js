@@ -129,6 +129,25 @@ function renderWeek(now){
 
   const host = document.getElementById("week");
   host.innerHTML = "";
+  
+  const prefs = readState("spo.v1.prefs");
+  const tasks = readState("spo.v1.tasks");
+  const allDeads = getAllDeadlines().filter(x => x.t).sort((a,b) => a.t - b.t);
+  const nextDead = allDeads.find(x => x.t > now && !tasks[x.a.id]);
+  
+  if(nextDead && !prefs[`dismiss_deadline_${nextDead.a.id}`]) {
+    const timeStr = nextDead.a.provisional ? `<del>${fmtDate(nextDead.t)}</del> (unconfirmed)` : fmtDate(nextDead.t);
+    host.innerHTML += `
+      <div style="background:var(--paper-2); padding:12px 16px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+        <div>
+          <div style="font-size:13px; font-weight:600; color:var(--alert); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:4px;">Next Deadline</div>
+          <div style="font-size:14.5px;"><b>${nextDead.course.title}</b>: <a href="#/academics/${nextDead.course.id}" style="color:inherit;">${nextDead.a.title}</a> (${timeStr})</div>
+        </div>
+        <button onclick="window.dismissDeadline('${nextDead.a.id}')" style="background:none; border:none; padding:8px; cursor:pointer; color:var(--ink-soft); font-size:20px; line-height:1;">&times;</button>
+      </div>
+    `;
+  }
+
   for(let i=0;i<7;i++){
     const d = addDays(anchor,i), k = key(d);
     const isToday = k === key(now);
@@ -224,6 +243,12 @@ window.loadSyncData = () => {
     alert("Failed to parse data. Make sure it's valid JSON.");
   }
 }
+window.dismissDeadline = id => {
+  const prefs = readState("spo.v1.prefs");
+  prefs[`dismiss_deadline_${id}`] = true;
+  writeState("spo.v1.prefs", prefs);
+  handleRoute();
+};
 
 function getAllSeminars() {
   const all = [];
@@ -306,10 +331,43 @@ function renderAcademicsRoute(path) {
   if (!path.length || path[0] === "") {
     renderAcademicsLanding(panel);
   } else if (path[0] === "deadlines") {
-    panel.innerHTML = `<div style="padding-top:20px;">Deadlines list placeholder</div>`;
+    renderDeadlinesRoute(panel);
   } else {
     renderAcademicsCourse(path[0], panel);
   }
+}
+
+function renderDeadlinesRoute(panel) {
+  const allDeads = getAllDeadlines().filter(x => x.t).sort((a,b) => a.t - b.t);
+  const tasks = readState("spo.v1.tasks");
+  
+  let html = `<div style="padding-top:16px;">
+    <a href="#/academics" style="display:inline-block; margin-bottom:16px; text-decoration:none; color:var(--ink-soft); font-size:14.5px;">&larr; Back to Academics</a>
+    <h2 style="font-family:'Instrument Serif',serif; font-size:32px; font-weight:400; margin:0 0 24px; line-height:1.1;">All Deadlines</h2>
+  `;
+  
+  let currentMonth = "";
+  for(const d of allDeads) {
+    const month = d.t.toLocaleDateString("en-GB", { month:"long", year:"numeric" });
+    if(month !== currentMonth) {
+      html += `<h3 style="font-size:18px; margin:24px 0 12px; border-bottom:1px solid var(--hair); padding-bottom:8px;">${month}</h3>`;
+      currentMonth = month;
+    }
+    const isDone = !!tasks[d.a.id];
+    const timeStr = d.a.provisional ? `<del>${fmtDate(d.t)}</del> (unconfirmed)` : fmtDate(d.t);
+    html += `
+      <div style="background:var(--paper-2); padding:12px; border-radius:6px; display:flex; gap:12px; align-items:flex-start; margin-bottom:8px;">
+        <input type="checkbox" onchange="window.toggleTask('${d.a.id}')" ${isDone?"checked":""} style="margin-top:3px;width:18px;height:18px;cursor:pointer;">
+        <div>
+          <div style="font-size:13.5px; color:var(--ink-soft); margin-bottom:2px;">${d.course.code} · ${timeStr}</div>
+          <div style="font-size:15px; margin-bottom:2px;">${d.a.title}</div>
+          <div style="font-size:13.5px; color:var(--ink-soft);">${d.a.weight !== null ? d.a.weight+"%" : "Unknown weight"}</div>
+        </div>
+      </div>
+    `;
+  }
+  html += `</div>`;
+  panel.innerHTML = html;
 }
 
 function renderAcademicsCourse(courseId, panel) {
