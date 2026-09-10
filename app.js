@@ -248,8 +248,126 @@ function renderAcademicsRoute(path) {
   } else if (path[0] === "deadlines") {
     panel.innerHTML = `<div style="padding-top:20px;">Deadlines list placeholder</div>`;
   } else {
-    panel.innerHTML = `<div style="padding-top:20px;">Course ${path[0]} placeholder</div>`;
+    renderAcademicsCourse(path[0], panel);
   }
+}
+
+function renderAcademicsCourse(courseId, panel) {
+  if(!window.COURSES) return;
+  const course = window.COURSES.find(c => c.id === courseId);
+  if(!course) {
+    panel.innerHTML = `<div class="empty">Course not found.</div>`;
+    return;
+  }
+  
+  const now = new Date();
+  const occs = occurrencesOf(course.scheduleId);
+  const tasks = readState("spo.v1.tasks");
+  const sems = getAllSeminars().filter(x => x.course.id === course.id);
+  const nextSem = sems.find(x => x.endT > now);
+  
+  let html = `<div style="padding-top:16px;">
+    <a href="#/academics" style="display:inline-block; margin-bottom:16px; text-decoration:none; color:var(--ink-soft); font-size:14.5px;">&larr; Back to Academics</a>
+    <h2 style="font-family:'Instrument Serif',serif; font-size:32px; font-weight:400; margin:0 0 8px; line-height:1.1;">${course.title}</h2>
+    <div style="font-size:15px; color:var(--ink-soft); margin-bottom:16px;">${course.code} · ${course.instructor || ""}</div>
+  `;
+  
+  // Shelf
+  if(course.shelf && course.shelf.length > 0) {
+    html += `<div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:24px;">`;
+    for(const link of course.shelf) {
+      html += `<a href="${link.url}" target="_blank" rel="noopener" style="display:inline-block; background:var(--paper-2); padding:6px 12px; border-radius:999px; text-decoration:none; color:var(--ink); font-size:13.5px;">${link.label}</a>`;
+    }
+    html += `</div>`;
+  }
+  
+  // Assessments
+  if(course.assessments && course.assessments.length > 0) {
+    html += `<h3 style="font-family:'Instrument Serif',serif; font-size:22px; font-weight:400; margin:0 0 12px;">Assessments</h3>`;
+    html += `<div style="display:grid; gap:8px; margin-bottom:32px;">`;
+    for(const a of course.assessments) {
+      const isDone = !!tasks[a.id];
+      const dueStr = a.due ? fmtDate(new Date(a.due)) : "No date";
+      html += `
+        <div style="display:flex; gap:12px; align-items:center; background:var(--paper-2); padding:10px 14px; border-radius:6px;">
+          <input type="checkbox" disabled ${isDone?"checked":""} style="width:18px;height:18px;">
+          <div style="flex:1;">
+            <div style="font-size:14.5px; font-weight:500;">${a.title}</div>
+            <div style="font-size:13px; color:var(--ink-soft);">${a.weight !== null ? a.weight+"%" : "Unknown weight"} · Due: ${dueStr}</div>
+          </div>
+        </div>
+      `;
+    }
+    html += `</div>`;
+  }
+  
+  // Seminars
+  if(course.seminars && course.seminars.length > 0) {
+    html += `<h3 style="font-family:'Instrument Serif',serif; font-size:22px; font-weight:400; margin:0 0 12px;">Seminars</h3>`;
+    html += `<div style="display:flex; flex-direction:column; gap:12px;">`;
+    
+    let nextN = nextSem ? nextSem.sem.n : -1;
+    
+    for(const semObj of sems) {
+      const sem = semObj.sem;
+      const isOpen = sem.n === nextN;
+      html += `<details ${isOpen ? "open" : ""} style="background:var(--paper-2); border-radius:6px; padding:12px 16px;">
+        <summary style="cursor:pointer; font-weight:500; font-size:15.5px; outline:none;">
+          Session ${sem.n}: ${sem.title || "No title"}
+          <div style="font-size:13.5px; font-weight:400; color:var(--ink-soft); margin-top:2px;">${fmtDate(semObj.d)}</div>
+        </summary>
+        <div style="padding-top:12px; margin-top:12px; border-top:1px dotted var(--hair); font-size:14.5px;">
+      `;
+      if(sem.part) html += `<div style="margin-bottom:8px; font-weight:600; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.05em; font-size:12px;">Part ${sem.part}</div>`;
+      if(sem.note) html += `<div style="margin-bottom:12px; font-style:italic;">Note: ${sem.note}</div>`;
+      if(sem.themes) {
+        html += `<div style="margin-bottom:12px;"><b>Themes:</b> ${sem.themes.join(" · ")}</div>`;
+      }
+      
+      // Readings placeholder for step 6
+      if(sem.readings && sem.readings.length > 0) {
+        html += `<div style="margin-bottom:12px;"><b>Readings:</b><ul>`;
+        for(const r of sem.readings) {
+          html += `<li>${r.author}. <i>${r.title}</i>. (${r.status})</li>`;
+        }
+        html += `</ul></div>`;
+      }
+      if(sem.briefings && sem.briefings.length > 0) {
+        html += `<div style="margin-bottom:12px;"><b>Briefings:</b><ul>`;
+        for(const b of sem.briefings) {
+          html += `<li>${b.student}: ${b.topic}</li>`;
+        }
+        html += `</ul></div>`;
+      }
+      if(sem.strands && sem.strands.length > 0) {
+        html += `<div style="margin-bottom:12px;"><b>Strands:</b><ul>`;
+        for(const s of sem.strands) {
+          html += `<li>${s.student}: ${s.topic}</li>`;
+        }
+        html += `</ul></div>`;
+      }
+      if(sem.links && sem.links.length > 0) {
+        html += `<div style="margin-bottom:12px;"><b>Links:</b><ul>`;
+        for(const l of sem.links) {
+          html += `<li><a href="${l.url}" target="_blank" rel="noopener">${l.label}</a></li>`;
+        }
+        html += `</ul></div>`;
+      }
+      if(sem.media && sem.media.length > 0) {
+        html += `<div style="margin-bottom:12px;"><b>Media:</b><ul>`;
+        for(const m of sem.media) {
+          html += `<li><a href="${m.url}" target="_blank" rel="noopener">${m.title}</a> (${m.type})</li>`;
+        }
+        html += `</ul></div>`;
+      }
+      
+      html += `</div></details>`;
+    }
+    html += `</div>`;
+  }
+  
+  html += `</div>`;
+  panel.innerHTML = html;
 }
 
 function renderAcademicsLanding(panel) {
