@@ -249,6 +249,41 @@ window.dismissDeadline = id => {
   writeState("spo.v1.prefs", prefs);
   handleRoute();
 };
+function formatICSDate(date) {
+  const pad = n => String(n).padStart(2,"0");
+  return date.getFullYear() + pad(date.getMonth() + 1) + pad(date.getDate()) + 'T' + pad(date.getHours()) + pad(date.getMinutes()) + pad(date.getSeconds());
+}
+window.exportICS = () => {
+  const utcNow = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  let ics = [
+    "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Sciences Po Timetable//EN",
+    "BEGIN:VTIMEZONE", "TZID:Europe/Paris", "X-LIC-LOCATION:Europe/Paris",
+    "BEGIN:DAYLIGHT", "TZOFFSETFROM:+0100", "TZOFFSETTO:+0200", "TZNAME:CEST",
+    "DTSTART:19700329T020000", "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU", "END:DAYLIGHT",
+    "BEGIN:STANDARD", "TZOFFSETFROM:+0200", "TZOFFSETTO:+0100", "TZNAME:CET",
+    "DTSTART:19701025T030000", "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU", "END:STANDARD", "END:VTIMEZONE"
+  ];
+  for(const x of getAllSeminars()) {
+    const locObj = window.LOC[x.sess.loc];
+    ics.push("BEGIN:VEVENT", `UID:sem-${x.course.id}-${x.sem.n}@timetable.local`, `DTSTAMP:${utcNow}`,
+      `DTSTART;TZID=Europe/Paris:${formatICSDate(x.startT)}`, `DTEND;TZID=Europe/Paris:${formatICSDate(x.endT)}`,
+      `SUMMARY:${x.course.title} (Session ${x.sem.n})`, `DESCRIPTION:${x.sem.title || ""}`);
+    if(locObj) ics.push(`LOCATION:${locObj.name} ${x.sess.room || ""}`);
+    ics.push("END:VEVENT");
+  }
+  for(const d of getAllDeadlines().filter(x => x.t)) {
+    ics.push("BEGIN:VEVENT", `UID:dead-${d.a.id}@timetable.local`, `DTSTAMP:${utcNow}`,
+      `DTSTART;TZID=Europe/Paris:${formatICSDate(d.t)}`, `DTEND;TZID=Europe/Paris:${formatICSDate(d.t)}`,
+      `SUMMARY:Deadline: ${d.course.code} - ${d.a.title}`, "END:VEVENT");
+  }
+  ics.push("END:VCALENDAR");
+  const blob = new Blob([ics.join("\r\n")], { type: 'text/calendar' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "sciences-po-timetable.ics";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
 
 function getAllSeminars() {
   const all = [];
@@ -620,7 +655,10 @@ function renderAcademicsLanding(panel) {
     <h3 style="font-family:'Instrument Serif',serif; font-size:22px; font-weight:400; margin:0 0 12px;">Data Sync</h3>
     <p style="font-size:14px; color:var(--ink-soft); margin-bottom:12px;">Your progress is stored locally on this device. You can copy this JSON to move it to another device.</p>
     <textarea id="syncData" style="width:100%; height:80px; font-family:monospace; font-size:12px; padding:8px; margin-bottom:8px; border:1px solid var(--hair); border-radius:4px;">${JSON.stringify(allState)}</textarea>
-    <button onclick="window.loadSyncData()" class="solid">Load Data</button>
+    <div style="display:flex; gap:8px;">
+      <button onclick="window.loadSyncData()" class="solid">Load Data</button>
+      <button onclick="window.exportICS()">Export to Calendar (ICS)</button>
+    </div>
   </div>`;
   
   html += `</div>`;
