@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spo-v3';
+const CACHE_NAME = 'spo-v4';
 const urlsToCache = [
   './',
   './index.html',
@@ -15,14 +15,30 @@ const urlsToCache = [
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(urlsToCache))
+      .then(() => self.skipWaiting())
   );
 });
 
 self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request).then(response => response || fetch(event.request))
-  );
+  const url = new URL(event.request.url);
+  const isNetworkFirst = event.request.mode === 'navigate' || 
+                         url.pathname.endsWith('/app.js') || 
+                         url.pathname.endsWith('/data-schedule.js') || 
+                         url.pathname.endsWith('/data-courses.js') ||
+                         url.pathname.endsWith('/index.html') ||
+                         url.pathname.endsWith('/');
+
+  if (isNetworkFirst) {
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match(event.request))
+    );
+  } else {
+    event.respondWith(
+      caches.match(event.request).then(response => response || fetch(event.request))
+    );
+  }
 });
 
 self.addEventListener('activate', event => {
@@ -33,6 +49,6 @@ self.addEventListener('activate', event => {
           return caches.delete(key);
         }
       }));
-    })
+    }).then(() => self.clients.claim())
   );
 });
