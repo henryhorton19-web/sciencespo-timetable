@@ -1,0 +1,177 @@
+:root{
+  --plaque:#0E3129;
+  --plaque-soft:#16463A;
+  --paper:#F1F1EC;
+  --paper-2:#E4E4DC;
+  --ink:#171A19;
+  --ink-soft:#5C6360;
+  --hair:#CFCFC5;
+  --chaise:#B0296B;
+  --sg27:#12609B;
+  --sg28:#B4720A;
+  --germain:#5C46A0;
+  --aquin:#0F7A6B;
+  --sport:#41565E;
+  --alert:#A32718;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:16px;
+  line-height:1.45;
+}
+.wrap{max-width:940px;margin:0 auto;padding:20px 18px 64px}
+
+/* ---- plaque hero ---- */
+.plaque{
+  background:var(--plaque);
+  color:#F4F6F2;
+  border:2px solid #F4F6F2;
+  outline:3px solid var(--plaque);
+  border-radius:6px;
+  padding:18px 20px 20px;
+  box-shadow:0 1px 0 rgba(0,0,0,.25);
+}
+.plaque .kicker{
+  font-family:"Instrument Serif",Georgia,serif;
+  font-size:15px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:#9FC0AF;
+  margin:0 0 6px;
+}
+.plaque h1{
+  font-family:"Instrument Serif",Georgia,serif;
+  font-weight:400;
+  font-size:clamp(30px,7vw,46px);
+  line-height:1.02;
+  margin:0 0 14px;
+  letter-spacing:.005em;
+}
+.plaque .clock{
+  font-variant-numeric:tabular-nums;
+  color:#9FC0AF;
+  font-size:14px;
+}
+.next{
+  margin-top:16px;
+  border-top:1px solid rgba(244,246,242,.28);
+  padding-top:14px;
+  display:grid;
+  gap:4px;
+}
+.next .lead{font-size:13.5px;color:#9FC0AF;font-variant-numeric:tabular-nums}
+.next .title{
+  font-family:"Instrument Serif",Georgia,serif;
+  font-size:clamp(21px,4.6vw,28px);
+  line-height:1.15;
+}
+.next .where{font-size:15px;color:#DCE6DD}
+.next .flag{color:#F7C6A8;font-size:14px;margin-top:4px}
+
+/* ---- controls ---- */
+.bar{
+  display:flex;align-items:center;gap:8px;
+  margin:22px 0 12px;flex-wrap:wrap;
+}
+.bar .label{
+  font-family:"Instrument Serif",Georgia,serif;
+  font-size:20px;flex:1 1 auto;min-width:180px;
+}
+button{
+  font:inherit;font-size:14px;
+  background:transparent;color:var(--ink);
+  border:1px solid var(--hair);border-radius:999px;
+  padding:6px 13px;cursor:pointer;
+}
+button:hover{background:var(--paper-2)}
+button:focus-visible{outline:2px solid var(--plaque);outline-offset:2px}
+button.solid{background:var(--plaque);color:#F4F6F2;border-color:var(--plaque)}
+
+/* ---- days ---- */
+.day{
+  border-top:1px solid var(--hair);
+  padding:14px 0 4px;
+}
+.day-head{
+  display:flex;align-items:baseline;gap:10px;margin-bottom:8px;
+}
+.day-head h2{
+  font-family:"Instrument Serif",Georgia,serif;
+  font-weight:400;font-size:21px;margin:0;
+}
+.day-head .date{font-size:13.5px;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.day.today .day-head h2{color:var(--plaque)}
+.day.today{
+  background:linear-gradient(90deg,rgba(14,49,41,.055),rgba(14,49,41,0) 70%);
+  border-top-color:var(--plaque);
+}
+.dot{
+  width:7px;height:7px;border-radius:50%;background:var(--plaque);
+  display:inline-block;margin-left:2px;
+}
+.empty{color:var(--ink-soft);font-size:14.5px;padding:2px 0 10px}
+
+.slot{
+  display:grid;
+  grid-template-columns:76px 4px 1fr;
+  gap:0 12px;
+  align-items:stretch;
+  padding:8px 0;
+}
+.slot + .slot{border-top:1px dotted var(--hair)}
+.time{
+  font-variant-numeric:tabular-nums;
+  font-size:14.5px;line-height:1.3;padding-top:2px;color:var(--ink);
+}
+.time small{display:block;color:var(--ink-soft);font-size:12.5px}
+.rail{border-radius:2px;background:var(--sg27)}
+.slot h3{margin:0 0 2px;font-size:16.5px;font-weight:600;line-height:1.25}
+.slot .code{font-weight:400;color:var(--ink-soft);font-size:13.5px}
+.slot .addr{font-size:14.5px;color:var(--ink-soft)}
+.slot .room{color:var(--ink);font-weight:500}
+.slot .flag{
+  font-size:13.5px;color:var(--alert);margin-top:3px;
+}
+.slot.done{opacity:.42}
+.slot.live .badge{
+  display:inline-block;background:var(--plaque);color:#F4F6F2;
+  border-radius:999px;padding:1px 9px;font-size:12.5px;margin-left:6px;
+  vertical-align:1px;
+}
+.exam{
+  font-size:14px;color:var(--sg28);padding:2px 0 10px;
+}
+
+/* ---- reference ---- */
+.ref{margin-top:40px;border-top:2px solid var(--plaque);padding-top:20px}
+.ref h2{font-family:"Instrument Serif",Georgia,serif;font-weight:400;font-size:24px;margin:0 0 14px}
+.cols{display:grid;gap:26px}
+@media(min-width:720px){.cols{grid-template-columns:1fr 1fr}}
+.ref h3{font-size:15px;margin:0 0 8px;font-weight:600}
+.addr-list,.term-list{list-style:none;margin:0;padding:0;font-size:14.5px}
+.addr-list li{padding:7px 0 7px 12px;border-left:4px solid var(--hair);margin-bottom:8px}
+.addr-list li b{display:block;font-weight:600}
+.addr-list li span{color:var(--ink-soft)}
+.term-list li{
+  display:flex;gap:10px;padding:5px 0;border-bottom:1px dotted var(--hair);
+}
+.term-list li span:first-child{flex:1 1 auto}
+.term-list li span:last-child{font-variant-numeric:tabular-nums;color:var(--ink-soft);text-align:right}
+.foot{margin-top:28px;font-size:13.5px;color:var(--ink-soft)}
+/* ---- links ---- */
+a.map-link{
+  color:inherit;text-decoration:underline dotted;text-underline-offset:2px;
+  padding:2px 0;display:inline-block;
+}
+a.map-link:hover, a.map-link:focus{text-decoration-style:solid}
+a.map-link:focus-visible{outline:2px solid var(--plaque);outline-offset:2px}
+.plaque a.map-link{color:#DCE6DD;text-decoration-color:rgba(244,246,242,.5) !important}
+@media (prefers-reduced-motion:no-preference){
+  .plaque{animation:rise .5s ease-out both}
+  @keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+}
