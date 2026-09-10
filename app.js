@@ -110,5 +110,82 @@ function tick(){
 document.getElementById("prev").onclick = () => { anchor = addDays(anchor,-7); tick(); };
 document.getElementById("next").onclick = () => { anchor = addDays(anchor,7); tick(); };
 document.getElementById("today").onclick = () => { anchor = mondayOf(new Date()); tick(); };
-tick();
-setInterval(tick, 30000);
+
+function parseHash() {
+  const h = window.location.hash.replace(/^#\/?/, "");
+  if(h.startsWith("academics")) {
+    return { tab: "academics", path: h.split("/").slice(1) };
+  }
+  return { tab: "week", path: h.split("/").slice(1) };
+}
+
+function switchTab(tabId) {
+  const isAcademics = tabId === "academics";
+  document.getElementById("tab-week").setAttribute("aria-selected", !isAcademics);
+  document.getElementById("tab-week").className = isAcademics ? "" : "solid";
+  document.getElementById("panel-week").style.display = isAcademics ? "none" : "block";
+
+  document.getElementById("tab-academics").setAttribute("aria-selected", isAcademics);
+  document.getElementById("tab-academics").className = isAcademics ? "solid" : "";
+  document.getElementById("panel-academics").style.display = isAcademics ? "block" : "none";
+}
+
+function renderAcademicsRoute(path) {
+  const panel = document.getElementById("panel-academics");
+  panel.innerHTML = `<div style="padding-top:20px;">Academics placeholder</div>`;
+}
+
+function handleRoute() {
+  const route = parseHash();
+  switchTab(route.tab);
+  if(route.tab === "week") {
+    if(route.path[0]) {
+      const d = parse(route.path[0]);
+      if(!isNaN(d)) anchor = mondayOf(d);
+    }
+    tick();
+  } else if(route.tab === "academics") {
+    renderHero(new Date()); // Ensure hero still updates
+    renderAcademicsRoute(route.path);
+  }
+}
+
+window.addEventListener("hashchange", handleRoute);
+
+document.getElementById("tab-week").addEventListener("click", () => {
+  window.location.hash = "/week";
+});
+document.getElementById("tab-academics").addEventListener("click", () => {
+  window.location.hash = "/academics";
+});
+
+const tablist = document.querySelector('[role="tablist"]');
+const tabs = tablist.querySelectorAll('[role="tab"]');
+tablist.addEventListener("keydown", (e) => {
+  let idx = Array.from(tabs).findIndex(t => t === document.activeElement);
+  if(idx === -1) return;
+  if(e.key === "ArrowRight") {
+    e.preventDefault();
+    tabs[(idx+1) % tabs.length].focus();
+  } else if(e.key === "ArrowLeft") {
+    e.preventDefault();
+    tabs[(idx-1+tabs.length) % tabs.length].focus();
+  } else if(e.key === "Home") {
+    e.preventDefault();
+    tabs[0].focus();
+  } else if(e.key === "End") {
+    e.preventDefault();
+    tabs[tabs.length-1].focus();
+  }
+});
+
+handleRoute();
+setInterval(() => {
+  const route = parseHash();
+  if (route.tab === "week") {
+    tick();
+  } else {
+    renderHero(new Date());
+    renderAcademicsRoute(route.path);
+  }
+}, 30000);

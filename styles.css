@@ -92,6 +92,17 @@ button:hover{background:var(--paper-2)}
 button:focus-visible{outline:2px solid var(--plaque);outline-offset:2px}
 button.solid{background:var(--plaque);color:#F4F6F2;border-color:var(--plaque)}
 
+[role="tablist"] {
+  display: flex;
+  gap: 8px;
+  margin: 16px 0;
+  border-bottom: 1px solid var(--hair);
+  padding-bottom: 16px;
+}
+[role="tab"] {
+  min-height: 44px;
+}
+
 /* ---- days ---- */
 .day{
   border-top:1px solid var(--hair);

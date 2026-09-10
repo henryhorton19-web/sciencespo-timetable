@@ -18,8 +18,13 @@
     <div class="next" id="nextBox"></div>
   </header>
 
-  <!-- Shell for the tabs. No routing yet, so we just display the week controls directly -->
-  <div id="tabBar" style="display:none;"></div>
+  <!-- Shell for the tabs -->
+  <div id="tabBar" class="tablist-container">
+    <div role="tablist" aria-label="Sections">
+      <button role="tab" aria-selected="true" aria-controls="panel-week" id="tab-week" class="solid">Week</button>
+      <button role="tab" aria-selected="false" aria-controls="panel-academics" id="tab-academics">Academics</button>
+    </div>
+  </div>
   
   <div id="panel-week">
     <div class="bar">
