@@ -31,12 +31,19 @@ function occurrencesOf(scheduleId) {
     const end = parse(b);
     while(d <= end) {
       if(((d.getDay()+6)%7 + 1) === sess.dow) {
-        out.push(new Date(d));
+        if(!sess.excludeDates || !sess.excludeDates.includes(key(d))) {
+          out.push(new Date(d));
+        }
       }
       d.setDate(d.getDate() + 1);
     }
   }
-  return out;
+  if(sess.extraDates) {
+    for(const extra of sess.extraDates) {
+      out.push(parse(extra.date));
+    }
+  }
+  return out.sort((a,b) => a - b);
 }
 
 let allGood = true;

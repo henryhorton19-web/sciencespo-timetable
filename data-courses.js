@@ -536,37 +536,62 @@ window.COURSES = [
 {
   id: "AECO25A27",
   code: "AECO 25A27",
-  title: "Economics for Enlightened Citizens",
+  title: "Econometrics and Mathematical Statistics for Opinion Polls and Policy Evaluation",
+  registrarTitle: "Econo for enlightened citizens",
   instructor: "Clément de Chaisemartin",
-  scheduleId: "econ",               // Thu 14:45, 9 rue de la Chaise room 931
+  scheduleId: "econ",
   building: "chaise",
   lastUpdated: "2026-09-10",
-  provisional: true,
-  note:"Only the grading weights are confirmed. Session titles are not yet supplied and every assessment date below is a placeholder guess, not a published date.",
+
+  materialsNote: "Lecture notes on the course Moodle page. The class mostly follows them.",
+  note: "Lectures 1-6 cover the statistical and econometric theory of surveys; lectures 7-12 cover counterfactual policy evaluation. Mathematically formalised: notation and proofs throughout. No TA sessions.",
+  studyNote: "The blue questions in the lecture notes are the only practice problems provided, and are indicative of quiz and exam questions. Reading the notes in advance is optional; if you do, pause on each blue question before reading on.",
+  examNote: "All four assessments are closed-book. Midterm and final include derivations, and one memorised proof from a list circulated beforehand. Full credit requires justifying every step by naming the property used.",
+  missedAssessmentNote: "A quiz or midterm missed with medical documentation on letterhead shifts its weight to the final. No make-up sittings. Missing one quiz makes the final worth 55%.",
+  attendanceNote: "In-person attendance mandatory. Lectures are not streamed or recorded.",
+  regradeNote: "Written regrade request within one week of a grade being released.",
 
   shelf: [],
 
   assessments: [
-    { id:"aeco-a1", type:"quiz", title:"Quiz or problem set 1", weight:15,
-      due:"2026-10-01T14:45", provisional:true, dueNote:"Guess: session 4. Not published." },
+    { id:"aeco-a1", type:"quiz", title:"Quiz 1", weight:15,
+      due:"2026-10-01T14:45", channel:"In class",
+      note:"15 minutes, closed book. Lecture 4." },
     { id:"aeco-a2", type:"exam", title:"Mid-term exam", weight:30,
-      due:"2026-10-17T09:00", provisional:true,
-      dueNote:"Guess: first Sciences Po mid-term Saturday. Other candidates 24 Oct, 7 Nov, 14 Nov." },
-    { id:"aeco-a3", type:"quiz", title:"Quiz or problem set 2", weight:15,
-      due:"2026-11-12T14:45", provisional:true, dueNote:"Guess: session 9. Not published." },
+      due:"2026-10-22T14:45", channel:"In class",
+      note:"One hour, closed book. Derivations and one memorised proof. Lecture 7." },
+    { id:"aeco-a3", type:"quiz", title:"Quiz 2", weight:15,
+      due:"2026-11-19T14:45", channel:"In class",
+      note:"15 minutes, closed book. Lecture 10." },
     { id:"aeco-a4", type:"exam", title:"Final exam", weight:40,
-      due:"2026-12-15T09:00", provisional:true,
-      dueNote:"Guess: mid-point of the final examination window, 11-19 December." }
+      due:"2026-12-03T14:45", channel:"In class",
+      note:"Two hours, closed book. Derivations and one memorised proof. Lecture 12, in the normal slot, not the December examination window." }
   ],
 
-  // Twelve derived Thursdays. Titles unknown; render as "Session n" until supplied.
-  seminars: Array.from({length:12}, (_,i) => ({ n:i+1, title:null, provisional:true, readings:[] })),
+  seminars: [
+    { n:1,  assertDate:"2026-09-10", title:null,
+      part:"I. Surveys: statistical and econometric theory",
+      note:"Class representative chosen in this session." },
+    { n:2,  assertDate:"2026-09-22", title:null,
+      part:"I. Surveys: statistical and econometric theory",
+      note:"Moved from Thursday 17 September. Tuesday 14:45-16:45, bâtiment L, 28 rue Saint-Guillaume, salle C." },
+    { n:3,  assertDate:"2026-09-24", title:null, part:"I. Surveys: statistical and econometric theory" },
+    { n:4,  assertDate:"2026-10-01", title:null, part:"I. Surveys: statistical and econometric theory",
+      deadlineHere:"aeco-a1" },
+    { n:5,  assertDate:"2026-10-08", title:null, part:"I. Surveys: statistical and econometric theory" },
+    { n:6,  assertDate:"2026-10-15", title:null, part:"I. Surveys: statistical and econometric theory" },
+    { n:7,  assertDate:"2026-10-22", title:null, part:"II. Counterfactual policy evaluation",
+      deadlineHere:"aeco-a2" },
+    { n:8,  assertDate:"2026-11-05", title:null, part:"II. Counterfactual policy evaluation" },
+    { n:9,  assertDate:"2026-11-12", title:null, part:"II. Counterfactual policy evaluation" },
+    { n:10, assertDate:"2026-11-19", title:null, part:"II. Counterfactual policy evaluation",
+      deadlineHere:"aeco-a3" },
+    { n:11, assertDate:"2026-11-26", title:null, part:"II. Counterfactual policy evaluation" },
+    { n:12, assertDate:"2026-12-03", title:null, part:"II. Counterfactual policy evaluation",
+      deadlineHere:"aeco-a4" }
+  ],
 
-  extraSessions:[
-    { date:"2026-09-22", from:"14:45", to:"16:45", room:"28 rue Saint-Guillaume, room C",
-      label:"Catch-up session", provisional:true,
-      note:"From the old registrar schedule. Confirm it still stands." }
-  ]
+  todo:"Individual lecture titles not published. Sessions render as 'Lecture n' under their part heading."
 }
 
 ];

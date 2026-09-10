@@ -18,9 +18,7 @@ window.SESSIONS = [
 
   {id:"investigating-ai", name:"Investigating with AI", code:"DHUM 25A43", dow:2, from:"08:00", to:"10:00",
    loc:"sg27", room:"salle 15 (Suzanne Borrel)", ranges:[["2026-09-08","2026-10-20"],["2026-11-03","2026-12-01"]]},
-  {id:"econ-catchup", name:"Econ for Enlightened Citizens", code:"AECO 25A27", dow:2, from:"14:45", to:"16:45",
-   loc:"sg28", room:"room C", flag:"Catch-up session from the old registrar schedule — check it still stands",
-   ranges:[["2026-09-22","2026-09-22"]]},
+
   {id:"wrestling-tue", name:"Wrestling · freestyle", code:"HSPO 5410", dow:2, from:"18:00", to:"20:00",
    loc:"suchet", room:"", ranges:[["2026-09-08","2026-12-15"]]},
 
@@ -31,7 +29,13 @@ window.SESSIONS = [
    loc:"suchet", room:"", ranges:[["2026-09-09","2026-12-16"]]},
 
   {id:"econ", name:"Econ for Enlightened Citizens", code:"AECO 25A27", dow:4, from:"14:45", to:"16:45",
-   loc:"chaise", room:"room 931", ranges:[["2026-09-10","2026-10-22"],["2026-11-05","2026-12-03"]]},
+   loc:"chaise", room:"room 931", ranges:[["2026-09-10","2026-10-22"],["2026-11-05","2026-12-03"]],
+   excludeDates: ["2026-09-17"],
+   extraDates: [
+     { date:"2026-09-22", from:"14:45", to:"16:45",
+       loc:"sg28", room:"bâtiment L, salle C",
+       note:"Lecture moved from Thursday 17 September" }
+   ]},
   {id:"tech-war", name:"Technology, War…", code:"DSPO 25A22", dow:4, from:"19:15", to:"21:15",
    loc:"sg27", room:"salle 15", ranges:[["2026-09-10","2026-10-22"],["2026-11-05","2026-12-03"]]},
 

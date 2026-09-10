@@ -19,12 +19,19 @@ function occurrencesOf(scheduleId) {
     const end = parse(b);
     while(d <= end) {
       if(((d.getDay()+6)%7 + 1) === sess.dow) {
-        out.push(new Date(d));
+        if(!sess.excludeDates || !sess.excludeDates.includes(key(d))) {
+          out.push(new Date(d));
+        }
       }
       d.setDate(d.getDate() + 1);
     }
   }
-  return out;
+  if(sess.extraDates) {
+    for(const extra of sess.extraDates) {
+      out.push(parse(extra.date));
+    }
+  }
+  return out.sort((a,b) => a - b);
 }
 
 function seminarDate(course, n) {
@@ -58,27 +65,48 @@ function sessionsOn(date){
   const k = key(date), dow = (date.getDay()+6)%7 + 1;
   const out = [];
   for(const s of SESSIONS){
-    if(s.dow !== dow) continue;
-    const on = s.ranges.some(([a,b]) => k >= a && k <= b);
+    let isWeekly = (s.dow === dow);
+    if(isWeekly && s.excludeDates && s.excludeDates.includes(k)) isWeekly = false;
+    
+    let on = false;
+    if(isWeekly) {
+      on = s.ranges.some(([a,b]) => k >= a && k <= b);
+    }
+    
+    let extraObj = null;
+    if(s.extraDates) {
+      extraObj = s.extraDates.find(x => x.date === k);
+      if(extraObj) on = true;
+    }
+
     if(on) {
-      let from = s.from, to = s.to, note = null;
-      if (window.COURSES) {
-        for (const c of window.COURSES) {
-          if (c.scheduleId === s.id && c.seminars) {
-            const occs = occurrencesOf(s.id);
-            const idx = occs.findIndex(d => key(d) === k);
-            if (idx !== -1) {
-              const sem = c.seminars.find(x => x.n === idx + 1);
-              if (sem && sem.timeOverride) {
-                from = sem.timeOverride.from;
-                to = sem.timeOverride.to;
-                note = "Time changed";
+      let from = s.from, to = s.to, note = null, loc = s.loc, room = s.room;
+      
+      if(extraObj) {
+        from = extraObj.from || from;
+        to = extraObj.to || to;
+        loc = extraObj.loc || loc;
+        room = extraObj.room || room;
+        note = extraObj.note || null;
+      } else {
+        if (window.COURSES) {
+          for (const c of window.COURSES) {
+            if (c.scheduleId === s.id && c.seminars) {
+              const occs = occurrencesOf(s.id);
+              const idx = occs.findIndex(d => key(d) === k);
+              if (idx !== -1) {
+                const sem = c.seminars.find(x => x.n === idx + 1);
+                if (sem && sem.timeOverride) {
+                  from = sem.timeOverride.from;
+                  to = sem.timeOverride.to;
+                  note = "Time changed";
+                }
               }
             }
           }
         }
       }
-      out.push({...s, from, to, _overrideNote: note});
+      out.push({...s, from, to, loc, room, _overrideNote: note});
     }
   }
   return out.sort((a,b) => a.from.localeCompare(b.from));
@@ -436,6 +464,7 @@ function renderAcademicsCourse(courseId, panel) {
   let html = `<div style="padding-top:16px;">
     <a href="#/academics" class="academics-back">&larr; Back to Academics</a>
     <h2 class="course-title">${course.title}</h2>
+    ${course.registrarTitle ? `<div style="font-size:14px; color:var(--ink-soft); margin-bottom:4px; font-style:italic;">Registrar: ${course.registrarTitle}</div>` : ""}
     <div class="course-meta">
       ${course.code} 
       ${course.instructor ? `· ${course.instructor}` : ""} 
@@ -459,10 +488,31 @@ function renderAcademicsCourse(courseId, panel) {
   if(course.lastUpdated) html += `<div style="font-size:13.5px; color:var(--ink-soft); margin-bottom:16px;">Last updated: ${course.lastUpdated}</div>`;
 
   // Course notes
+  // Course notes
   if(course.note) html += `<div class="course-note"><strong>Note:</strong> ${course.note}</div>`;
-  if(course.aiPolicyNote) html += `<div class="course-note"><strong>AI Policy:</strong> ${course.aiPolicyNote}</div>`;
-  if(course.citationStyleNote) html += `<div class="course-note"><strong>Citation Style:</strong> ${course.citationStyleNote}</div>`;
-  if(course.submissionNote) html += `<div class="course-note"><strong>Submission:</strong> ${course.submissionNote}</div>`;
+  
+  // Course rules
+  let rulesHtml = "";
+  if(course.aiPolicyNote) rulesHtml += `<div style="margin-bottom:8px;"><strong>AI Policy:</strong> ${course.aiPolicyNote}</div>`;
+  if(course.citationStyleNote) rulesHtml += `<div style="margin-bottom:8px;"><strong>Citation Style:</strong> ${course.citationStyleNote}</div>`;
+  if(course.submissionNote) rulesHtml += `<div style="margin-bottom:8px;"><strong>Submission:</strong> ${course.submissionNote}</div>`;
+  if(course.materialsNote) rulesHtml += `<div style="margin-bottom:8px;"><strong>Materials:</strong> ${course.materialsNote}</div>`;
+  if(course.studyNote) rulesHtml += `<div style="margin-bottom:8px;"><strong>Study Note:</strong> ${course.studyNote}</div>`;
+  if(course.examNote) rulesHtml += `<div style="margin-bottom:8px;"><strong>Exam Note:</strong> ${course.examNote}</div>`;
+  if(course.missedAssessmentNote) rulesHtml += `<div style="margin-bottom:8px;"><strong>Missed Assessment:</strong> ${course.missedAssessmentNote}</div>`;
+  if(course.attendanceNote) rulesHtml += `<div style="margin-bottom:8px;"><strong>Attendance:</strong> ${course.attendanceNote}</div>`;
+  if(course.regradeNote) rulesHtml += `<div style="margin-bottom:8px;"><strong>Regrades:</strong> ${course.regradeNote}</div>`;
+  
+  if(rulesHtml) {
+    html += `
+      <details class="accordion-details" style="margin-bottom:16px;">
+        <summary class="accordion-summary" style="font-weight:600; font-size:14.5px;">Course rules &amp; policies</summary>
+        <div class="accordion-content" style="font-size:14.5px;">
+          ${rulesHtml}
+        </div>
+      </details>
+    `;
+  }
   
   // Shelf
   if(course.shelf && course.shelf.length > 0) {
@@ -532,15 +582,15 @@ function renderAcademicsCourse(courseId, panel) {
     for(const semObj of sems) {
       const sem = semObj.sem;
       const isOpen = sem.n === nextN;
-      
-      const semTitle = sem.title ? sem.title : `Session ${sem.n}`;
+      const sessionWord = course.code.startsWith("AECO") ? "Lecture" : "Session";
+      const semTitle = sem.title ? sem.title : `${sessionWord} ${sem.n}`;
       
       html += `<details ${isOpen ? "open" : ""} class="accordion-details">
         <summary class="accordion-summary">
           <div class="sem-title-box">
             <h4 class="sem-title">
               ${sem.provisional ? `<span class="course-unconfirmed">(Unconfirmed)</span> ` : ""}
-              Session ${sem.n}: ${semTitle}
+              ${semTitle}
             </h4>
           </div>
           <div class="sem-date">${fmtDate(semObj.d)}</div>
