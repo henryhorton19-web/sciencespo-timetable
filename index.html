@@ -24,6 +24,7 @@
     <div role="tablist" aria-label="Sections">
       <button role="tab" aria-selected="true" aria-controls="panel-week" id="tab-week" class="solid">Week</button>
       <button role="tab" aria-selected="false" aria-controls="panel-academics" id="tab-academics">Academics</button>
+      <button role="tab" aria-selected="false" aria-controls="panel-tasks" id="tab-tasks">Tasks</button>
     </div>
   </div>
   
@@ -80,6 +81,16 @@
   </div>
 
   <div id="panel-academics" role="tabpanel" aria-labelledby="tab-academics" style="display:none;"></div>
+
+  <div id="panel-tasks" role="tabpanel" aria-labelledby="tab-tasks" style="display:none;">
+    <div class="bar task-nav">
+      <div class="label" id="taskWeekLabel"></div>
+      <button id="taskPrev" aria-label="Previous week">&larr; Earlier</button>
+      <button id="taskToday" class="solid">This week</button>
+      <button id="taskNext" aria-label="Next week">Later &rarr;</button>
+    </div>
+    <div id="taskContent"></div>
+  </div>
 </div>
 
 <script src="vendor/fuse.min.js"></script>

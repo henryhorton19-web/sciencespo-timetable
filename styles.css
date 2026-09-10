@@ -229,3 +229,13 @@ a.map-link:focus-visible{outline:2px solid var(--plaque);outline-offset:2px}
 .sem-date { font-size:13.5px; font-weight:400; color:var(--ink-soft); margin-top:2px; }
 
 .deadline-inline { display:inline-block; background:#f9e8e6; color:var(--alert); border:1px solid #f2c7c3; border-radius:4px; padding:4px 8px; font-size:13px; font-weight:600; margin-bottom:12px; }
+
+/* ---- tasks tab ---- */
+.task-nav { margin-bottom:16px; }
+.task-progress { font-size:15px; font-weight:600; margin-bottom:16px; }
+.task-group { border-left:4px solid var(--rail); padding-left:12px; margin-bottom:24px; }
+.task-group-head { font-size:14.5px; font-weight:600; color:var(--ink-soft); margin-bottom:12px; }
+.task-row { display:flex; gap:12px; align-items:flex-start; background:var(--paper-2); padding:10px 14px; border-radius:6px; margin-bottom:8px; }
+.task-overdue { color:var(--alert); }
+.task-empty { font-size:15px; color:var(--ink-soft); margin-bottom:16px; font-style:italic; }
+.task-ongoing { margin-top:24px; }
