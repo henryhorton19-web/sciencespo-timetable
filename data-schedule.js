@@ -7,11 +7,14 @@ window.LOC = {
   sp28:{name:"28 rue des Saints-Pères", colour:"var(--germain)", address:"28 Rue des Saints-Pères, 75007 Paris, France"},
   aquin:{name:"1 place Saint-Thomas d'Aquin", colour:"var(--aquin)", address:"1 Place Saint-Thomas d'Aquin, 75007 Paris, France"},
   suchet:{name:"Stade Suchet gymnase, 25 av du Maréchal Franchet d'Esperey", colour:"var(--sport)", address:"Stade Suchet, 25 Avenue du Marechal Franchet d'Esperey, 75016 Paris, France"},
-  breguet:{name:"Centre Sportif Bréguet", colour:"var(--sport)", address:"25-27 Rue Breguet, 75011 Paris, France"}
+  breguet:{name:"Centre Sportif Bréguet", colour:"var(--sport)", address:"25-27 Rue Breguet, 75011 Paris, France"},
+  online:{name:"Online / Remote", colour:"#2563eb", address:"Online / Remote"}
 };
 
 // dow: 1 = Monday. ranges: [firstDate, lastDate] inclusive, weekly on dow.
 window.SESSIONS = [
+  {id:"avyn-mon", name:"Avyn Team Meeting", code:"MEET", dow:1, from:"11:00", to:"11:30",
+   loc:"online", room:"Online", ranges:[["2026-09-07","2026-10-23"],["2026-11-02","2026-12-18"]]},
   {id:"ethics-war", name:"Ethics of War and Peace", code:"AHUM 25A15", dow:1, from:"17:00", to:"19:00",
    loc:"sg28", room:"AMPHI28", ranges:[["2026-09-07","2026-10-19"],["2026-11-02","2026-11-30"]]},
 
@@ -20,7 +23,8 @@ window.SESSIONS = [
   {id:"francais-tue", name:"Français A2", code:"LFRA 51D0", dow:2, from:"10:15", to:"12:15",
    loc:"aquin", room:"room C.S26",
    ranges:[["2026-09-07","2026-10-20"],["2026-11-03","2026-12-01"]]},
-
+  {id:"avyn-tue", name:"Avyn Team Meeting", code:"MEET", dow:2, from:"11:00", to:"11:30",
+   loc:"online", room:"Online", ranges:[["2026-09-07","2026-10-23"],["2026-11-02","2026-12-18"]]},
   {id:"wrestling-tue", name:"Wrestling · freestyle", code:"HSPO 5410", dow:2, from:"18:00", to:"20:00",
    loc:"suchet", room:"", ranges:[["2026-09-08","2026-12-15"]]},
 
@@ -30,9 +34,13 @@ window.SESSIONS = [
    extraDates:[
      { date:"2026-12-09", from:"10:15", to:"12:15", loc:"sg30", room:"room E.104", note:"Séance de rattrapage" }
    ]},
+  {id:"avyn-wed", name:"Avyn Team Meeting", code:"MEET", dow:3, from:"11:00", to:"11:30",
+   loc:"online", room:"Online", ranges:[["2026-09-07","2026-10-23"],["2026-11-02","2026-12-18"]]},
   {id:"wrestling-wed", name:"Wrestling · Greco-Roman", code:"", dow:3, from:"19:00", to:"20:30",
    loc:"suchet", room:"", ranges:[["2026-09-09","2026-12-16"]]},
 
+  {id:"avyn-thu", name:"Avyn Team Meeting", code:"MEET", dow:4, from:"11:00", to:"11:30",
+   loc:"online", room:"Online", ranges:[["2026-09-07","2026-10-23"],["2026-11-02","2026-12-18"]]},
   {id:"econ", name:"Econ for Enlightened Citizens", code:"AECO 25A27", dow:4, from:"14:45", to:"16:45",
    loc:"chaise", room:"room 931", ranges:[["2026-09-10","2026-10-22"],["2026-11-05","2026-12-03"]],
    excludeDates: ["2026-09-17"],
@@ -46,6 +54,8 @@ window.SESSIONS = [
 
   {id:"digital-public", name:"Socio of Digital Public Spaces", code:"DSOC 25A42", dow:5, from:"08:00", to:"10:00",
    loc:"sg27", room:"salle 26", ranges:[["2026-09-11","2026-10-23"],["2026-11-02","2026-12-10"]]},
+  {id:"avyn-fri", name:"Avyn Team Meeting", code:"MEET", dow:5, from:"11:00", to:"11:30",
+   loc:"online", room:"Online", ranges:[["2026-09-07","2026-10-23"],["2026-11-02","2026-12-18"]]},
   {id:"wrestling-fri", name:"Wrestling · freestyle & Greco", code:"", dow:5, from:"18:30", to:"20:00",
    loc:"breguet", room:"", ranges:[["2026-09-11","2026-12-18"]]},
 
