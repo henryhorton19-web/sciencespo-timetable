@@ -30,10 +30,7 @@ window.SESSIONS = [
 
   {id:"francais-wed", name:"Français A2", code:"LFRA 51D0", dow:3, from:"10:15", to:"12:15",
    loc:"sp28", room:"room H005",
-   ranges:[["2026-09-07","2026-10-21"],["2026-11-04","2026-11-04"],["2026-11-18","2026-12-02"]],
-   extraDates:[
-     { date:"2026-12-09", from:"10:15", to:"12:15", loc:"sg30", room:"room E.104", note:"Séance de rattrapage" }
-   ]},
+   ranges:[["2026-09-07","2026-10-21"],["2026-11-04","2026-11-04"],["2026-11-18","2026-12-09"]]},
   {id:"avyn-wed", name:"Avyn Team Meeting", code:"MEET", dow:3, from:"11:00", to:"11:30",
    loc:"online", room:"Online", ranges:[["2026-09-07","2026-10-23"],["2026-11-02","2026-12-18"]]},
   {id:"wrestling-wed", name:"Wrestling · Greco-Roman", code:"", dow:3, from:"19:00", to:"20:30",
