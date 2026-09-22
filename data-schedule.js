@@ -27,6 +27,8 @@ window.SESSIONS = [
    loc:"online", room:"Online", ranges:[["2026-09-07","2026-10-23"],["2026-11-02","2026-12-18"]]},
   {id:"wrestling-tue", name:"Wrestling · freestyle", code:"HSPO 5410", dow:2, from:"18:00", to:"20:00",
    loc:"suchet", room:"", ranges:[["2026-09-08","2026-12-15"]]},
+  {id:"wrestling-tue-comp", name:"Wrestling · freestyle (Compétition)", code:"", dow:2, from:"18:30", to:"20:00",
+   loc:"breguet", room:"", ranges:[["2026-09-08","2026-12-15"]]},
 
   {id:"francais-wed", name:"Français A2", code:"LFRA 51D0", dow:3, from:"10:15", to:"12:15",
    loc:"sp28", room:"room H005",
@@ -46,8 +48,12 @@ window.SESSIONS = [
        loc:"sg28", room:"bâtiment L, salle C",
        note:"Lecture moved from Thursday 17 September" }
    ]},
+  {id:"wrestling-thu", name:"Wrestling · freestyle", code:"", dow:4, from:"18:30", to:"20:30",
+   loc:"breguet", room:"", ranges:[["2026-09-10","2026-12-17"]]},
   {id:"tech-war", name:"Technology, War…", code:"DSPO 25A22", dow:4, from:"19:15", to:"21:15",
    loc:"sg27", room:"salle 15", ranges:[["2026-09-10","2026-10-22"],["2026-11-05","2026-12-03"]]},
+  {id:"wrestling-thu-comp", name:"Wrestling · freestyle (Compétition)", code:"", dow:4, from:"20:00", to:"22:30",
+   loc:"suchet", room:"", ranges:[["2026-09-10","2026-12-17"]]},
 
   {id:"digital-public", name:"Socio of Digital Public Spaces", code:"DSOC 25A42", dow:5, from:"08:00", to:"10:00",
    loc:"sg27", room:"salle 26", ranges:[["2026-09-11","2026-10-23"],["2026-11-02","2026-12-10"]]},
@@ -56,7 +62,11 @@ window.SESSIONS = [
   {id:"wrestling-fri", name:"Wrestling · freestyle & Greco", code:"", dow:5, from:"18:30", to:"20:00",
    loc:"breguet", room:"", ranges:[["2026-09-11","2026-12-18"]]},
 
+  {id:"wrestling-sat-youth", name:"Wrestling · youth (U7 to U13)", code:"", dow:6, from:"12:00", to:"13:30",
+   loc:"suchet", room:"", ranges:[["2026-09-12","2026-12-19"]]},
   {id:"wrestling-sat", name:"Wrestling · U15 to U23", code:"", dow:6, from:"13:30", to:"15:30",
+   loc:"suchet", room:"", flag:"Clashes with mid-term exams on 17 and 24 Oct, 7 and 14 Nov", ranges:[["2026-09-12","2026-12-19"]]},
+  {id:"wrestling-sat-comp", name:"Wrestling · Compétition (U17 to Senior)", code:"", dow:6, from:"15:30", to:"18:00",
    loc:"suchet", room:"", flag:"Clashes with mid-term exams on 17 and 24 Oct, 7 and 14 Nov", ranges:[["2026-09-12","2026-12-19"]]}
 ];
 
